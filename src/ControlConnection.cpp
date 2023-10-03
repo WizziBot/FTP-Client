@@ -3,6 +3,7 @@
 
 #define S_READY 220
 #define S_STATUS_INDICATOR 211
+#define S_GOODBYE 221
 
 namespace FTP {
 
@@ -20,7 +21,6 @@ ControlConnection::ControlConnection(const char* dst_ip){
 }
 
 ControlConnection::~ControlConnection(){
-    printf("Destructor called");
     if (conn_status == CONN_SUCCESS){
         conn_status = CONN_TERM;
         close(client_socket);
@@ -32,7 +32,6 @@ pair<int,string> ControlConnection::fromTelnet(char* buff,int buff_len){
     char s_msg[1024] = {0};
     int code;
     int isTelnet = 0;
-    printf("--a--");
     for (int i=0; i<buff_len; i++){
         if (i<3) s_code[i] = buff[i];
         if (buff[i] == '\r') {
@@ -57,24 +56,40 @@ string ControlConnection::toTelnet(string command){
     return command.append("\r\n");
 }
 
-void ControlConnection::readDataUntilCode(int stop_code){
+void ControlConnection::readDataUntilCode(int stop_code,int n_times){
     int bytes_received = 1;
-    int loc_pointer = 0;
+    int line_start = 0;
+    int line_end = 0;
     char s_stop[5];
+    int code_count = 0;
+    int isLineEnd = 0;
     sprintf(s_stop,"%d ",stop_code);
-    printf("needle: %s\n",s_stop);
-    fflush(stdout);
     while (bytes_received != 0){
-        bytes_received = recv(client_socket,(char*)msg_recv_buffer+loc_pointer,sizeof(msg_recv_buffer),0);
+        bytes_received = recv(client_socket,(char*)msg_recv_buffer+line_end,sizeof(char),0);
         if (bytes_received == -1){
-            cerr << "Error in receiving control data segment" << endl;
+            cerr << "Error in receiving control data byte" << endl;
         } else {
-            if (strstr(msg_recv_buffer,s_stop)){
-                break;
-            }
+            if (isLineEnd && msg_recv_buffer[line_end] == '\n'){
+                // Check for stop code within line
+                if (msg_recv_buffer[line_start] == s_stop[0] && msg_recv_buffer[line_start+1] == s_stop[1] && msg_recv_buffer[line_start+2] == s_stop[2]) {
+                    code_count++;
+                }
+                if (code_count == n_times){
+                    msg_recv_buffer[line_end+1] = '\0';
+                    break;
+                }
+                isLineEnd = 0;
+                line_start = line_end + 1;
+            } else isLineEnd = 0;
+            // Detect line end
+            if (msg_recv_buffer[line_end] == '\r') isLineEnd = 1;
+            line_end++;
+
         }
     }
-    recv(client_socket,(char*)msg_recv_buffer+loc_pointer,sizeof(msg_recv_buffer),MSG_DONTWAIT);
+
+    cout << "CHARGE" << endl;
+
     cout << msg_recv_buffer << endl;
 }
 
@@ -88,10 +103,14 @@ void ControlConnection::processResponseCode(char* s_code){
         return;
     }
     cout << "CODE: " << r_code << endl;
-    switch (r_code)
-    {
+    switch (r_code) {
     case S_STATUS_INDICATOR:
-        readDataUntilCode(S_STATUS_INDICATOR);
+        readDataUntilCode(S_STATUS_INDICATOR,2);
+        break;
+    case S_GOODBYE:
+        cout << "221 Goodbye" << endl;
+        conn_status = CONN_TERM;
+        close(client_socket);
         break;
     default:
         cout << "[Unknown response code]: " << r_code << endl;
