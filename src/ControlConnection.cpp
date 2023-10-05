@@ -5,6 +5,9 @@
 #define S_STATUS_INDICATOR 211
 #define S_GOODBYE 221
 
+// Checks for digit between 0 and 9 inclusive
+#define isDigit(x) (x >= 0x30 && x <= 0x39)
+
 namespace FTP {
 
 using namespace std;
@@ -87,21 +90,20 @@ void ControlConnection::readDataUntilCode(int stop_code,int n_times){
 
         }
     }
-
-    cout << "CHARGE" << endl;
-
+    
     cout << msg_recv_buffer << endl;
 }
 
 // TODO: Implement function map
 void ControlConnection::processResponseCode(char* s_code){
     int r_code;
-    s_code[4] = '\0';
-    try {
-        r_code = stoi(s_code);
-    } catch(const std::invalid_argument& e) {
+    // Return if s_code does not contain a response code
+    if (!isDigit(s_code[0]) || !isDigit(s_code[1]) || !isDigit(s_code[2]))){
         return;
     }
+    // Convert code to integer for easy mapping
+    s_code[4] = '\0';
+    r_code = stoi(s_code);
     cout << "CODE: " << r_code << endl;
     switch (r_code) {
     case S_STATUS_INDICATOR:
@@ -115,7 +117,7 @@ void ControlConnection::processResponseCode(char* s_code){
     default:
         cout << "[Unknown response code]: " << r_code << endl;
         if (recv(client_socket,msg_recv_buffer,sizeof(msg_recv_buffer),0) == -1){
-            perror("Error in receiving server hello");
+            perror("Error in receiving server hello\n");
             conn_status = CONN_TERM;
             close(client_socket);
         } else {
@@ -135,7 +137,8 @@ void ControlConnection::interactive(){
         getline(cin, command);
         string send_command = toTelnet(command);
         send(client_socket,send_command.c_str(),send_command.length(),0);
-        if (recv(client_socket,msg_recv_buffer,3,MSG_PEEK) == -1){
+        // MSG_PEEK to not disturb the buffer, MSG_WAITALL to ensure response code is received
+        if (recv(client_socket,msg_recv_buffer,3,MSG_PEEK | MSG_WAITALL) == -1){
             cerr << "Error in receiving response to command:" << endl;
             cerr << command << endl;
         } else {
