@@ -62,7 +62,10 @@ private:
 
 void readDataUntilCode(char* stop_code);
 
-void processResponseCode(char* s_code);
+/*
+    Process the response code in the msg_recv_buffer
+*/
+int processResponseCode();
 
 /*  Parse a Telnet string which is terminated by \r\n
     @returns null terminated response string and response code as a pair.
