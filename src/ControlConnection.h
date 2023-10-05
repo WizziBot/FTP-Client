@@ -45,7 +45,7 @@ eConnStatus getConStatus(){return conn_status;}
 
 private:
 
-void readDataUntilCode(int stop_code, int n_times);
+void readDataUntilCode(char* stop_code);
 
 void processResponseCode(char* s_code);
 

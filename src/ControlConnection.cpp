@@ -59,14 +59,28 @@ string ControlConnection::toTelnet(string command){
     return command.append("\r\n");
 }
 
-void ControlConnection::readDataUntilCode(int stop_code,int n_times){
+// Reads from the start of long response till the end of it by reading the stop_code twice
+// RFC 4.2:
+/*
+    Thus the format for multi-line replies is that the first line
+         will begin with the exact required reply code, followed
+         immediately by a Hyphen, "-" (also known as Minus), followed by
+         text.  The last line will begin with the same code, followed
+         immediately by Space <SP>, optionally some text, and the Telnet
+         end-of-line code.
+
+            For example:
+                                123-First line
+                                Second line
+                                  234 A line beginning with numbers
+                                123 The last line
+*/
+void ControlConnection::readDataUntilCode(char* stop_code){
     int bytes_received = 1;
     int line_start = 0;
     int line_end = 0;
-    char s_stop[5];
     int code_count = 0;
     int isLineEnd = 0;
-    sprintf(s_stop,"%d ",stop_code);
     while (bytes_received != 0){
         bytes_received = recv(client_socket,(char*)msg_recv_buffer+line_end,sizeof(char),0);
         if (bytes_received == -1){
@@ -74,10 +88,10 @@ void ControlConnection::readDataUntilCode(int stop_code,int n_times){
         } else {
             if (isLineEnd && msg_recv_buffer[line_end] == '\n'){
                 // Check for stop code within line
-                if (msg_recv_buffer[line_start] == s_stop[0] && msg_recv_buffer[line_start+1] == s_stop[1] && msg_recv_buffer[line_start+2] == s_stop[2]) {
+                if (msg_recv_buffer[line_start] == stop_code[0] && msg_recv_buffer[line_start+1] == stop_code[1] && msg_recv_buffer[line_start+2] == stop_code[2]) {
                     code_count++;
                 }
-                if (code_count == n_times){
+                if (code_count == 2){
                     msg_recv_buffer[line_end+1] = '\0';
                     break;
                 }
@@ -96,19 +110,18 @@ void ControlConnection::readDataUntilCode(int stop_code,int n_times){
 
 // TODO: Implement function map
 void ControlConnection::processResponseCode(char* s_code){
-    int r_code;
     // Return if s_code does not contain a response code
-    if (!isDigit(s_code[0]) || !isDigit(s_code[1]) || !isDigit(s_code[2]))){
+    if (!isDigit(s_code[0]) || !isDigit(s_code[1]) || !isDigit(s_code[2])){
         return;
     }
     // Convert code to integer for easy mapping
-    s_code[4] = '\0';
-    r_code = stoi(s_code);
+    if (s_code[3] == '-'){
+        readDataUntilCode(s_code);
+        return;
+    }
+    int r_code = stoi(s_code);
     cout << "CODE: " << r_code << endl;
     switch (r_code) {
-    case S_STATUS_INDICATOR:
-        readDataUntilCode(S_STATUS_INDICATOR,2);
-        break;
     case S_GOODBYE:
         cout << "221 Goodbye" << endl;
         conn_status = CONN_TERM;
@@ -138,7 +151,7 @@ void ControlConnection::interactive(){
         string send_command = toTelnet(command);
         send(client_socket,send_command.c_str(),send_command.length(),0);
         // MSG_PEEK to not disturb the buffer, MSG_WAITALL to ensure response code is received
-        if (recv(client_socket,msg_recv_buffer,3,MSG_PEEK | MSG_WAITALL) == -1){
+        if (recv(client_socket,msg_recv_buffer,4,MSG_PEEK | MSG_WAITALL) == -1){
             cerr << "Error in receiving response to command:" << endl;
             cerr << command << endl;
         } else {
