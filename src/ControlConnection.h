@@ -23,18 +23,12 @@
 #include <arpa/inet.h>
 #include <string.h>
 
-#define PORT 21
+#include <StatusConstants.h>
+#include <DataConnection.h>
 
 namespace FTP {
 
 using namespace std;
-
-enum eConnStatus {
-    CONN_NOT_INIT,
-    CONN_FAILED,
-    CONN_SUCCESS,
-    CONN_TERM
-};
 
 class ControlConnection {
 
@@ -82,6 +76,8 @@ eConnStatus conn_status = CONN_NOT_INIT;
 int client_socket;
 struct sockaddr_in server_addr;
 char msg_recv_buffer[1024];
+
+DataConnection* data_connection;
 };
  
 }

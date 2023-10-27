@@ -19,6 +19,7 @@
 #define S_READY 220
 #define S_STATUS_INDICATOR 211
 #define S_GOODBYE 221
+#define S_PASSIVE_MODE 227
 
 #define D1_PRELIMINARY '1'
 #define D1_COMPLETION '2'
@@ -40,7 +41,7 @@ ControlConnection::ControlConnection(const char* dst_ip){
         exit(1);
     }
     server_addr.sin_family = AF_INET;
-    server_addr.sin_port = htons(PORT);
+    server_addr.sin_port = htons(CONTROL_PORT);
     server_addr.sin_addr.s_addr = inet_addr(dst_ip);
 }
 
@@ -153,12 +154,18 @@ int ControlConnection::processResponseCode(){
             conn_status = CONN_TERM;
             close(client_socket);
             break;
+        case S_PASSIVE_MODE:
+            if (recv(client_socket,msg_recv_buffer,sizeof(msg_recv_buffer),0) == -1){
+                perror("Error in receiving passive mode information\n");
+            } else {
+                pair<int,string> r_message = fromTelnet(msg_recv_buffer,sizeof(msg_recv_buffer));
+                data_connection = new DataConnection(r_message.second);
+            }
+            break;
         default:
             cout << "[Unknown response code]: " << r_code << endl;
             if (recv(client_socket,msg_recv_buffer,sizeof(msg_recv_buffer),0) == -1){
                 perror("Error in receiving server hello\n");
-                conn_status = CONN_TERM;
-                close(client_socket);
             } else {
                 pair<int,string> r_message = fromTelnet(msg_recv_buffer,sizeof(msg_recv_buffer));
                 cout << r_message.second << endl;
