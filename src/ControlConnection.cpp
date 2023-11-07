@@ -176,8 +176,15 @@ int ControlConnection::processResponseCode(){
     return isOpenToNewCommand;
 }
 
+void processUserCommand(string command){
+    // TODO
+    // Parse arguments from spaces
+    // switch case from base command, pass parameters if correct count
+}
 
 
+// TODO: Have command queue which queues the commands that need to be sent,
+// if no queued commands then user input is taken.
 void ControlConnection::interactive(){
     int openToNewCommands = 1;
     while (conn_status == CONN_SUCCESS){
