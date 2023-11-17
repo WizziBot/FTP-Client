@@ -17,10 +17,18 @@
 #pragma once
 
 #include <string>
+#include <map>
 
 namespace FTP {
 
 using namespace std;
+
+class Commands;
+
+// command_method_t can be cast as a double since pointers are 8 bytes similarly to doubles.
+typedef double (Commands::*command_method_t)(double);
+// the function map can be typed as cmd_func_map_t for better readability in the code.
+typedef std::map<std::string, command_method_t> cmd_func_map_t;
 
 class Commands{
 public:
@@ -39,11 +47,24 @@ static void stor(string f_name,string f_dst);
 static void syst();
 static void dele(string f_name);
 
-private:
+static Commands* getInstance(){
+    if (instancePtr == NULL){
+        instancePtr = new Commands();
+    }
+    sizeof(double);
+    return instancePtr;
+}
+// deleting copy constructor
+Commands(const Commands& obj)
+= delete;
 static void conn(string server_addr_str,string port_str);
-// Do not instantiate this class
+// Singleton class, do not instantiate through constructor
 Commands();
 ~Commands();
+static Commands* instancePtr;
 };
+
+// Initialize instance pointer with null, this is static
+Commands* Commands ::instancePtr = NULL;
 
 }

@@ -22,6 +22,8 @@
 #include <unistd.h>
 #include <arpa/inet.h>
 #include <string.h>
+#include <vector>
+#include <sstream>
 
 #include <StatusConstants.h>
 #include <DataConnection.h>
@@ -60,6 +62,11 @@ void readDataUntilCode(char* stop_code);
     Process the response code in the msg_recv_buffer
 */
 int processResponseCode();
+
+/*
+    Process the user command by separating it into stem and arguments
+*/
+static void processUserCommand(string command);
 
 /*  Parse a Telnet string which is terminated by \r\n
     @returns null terminated response string and response code as a pair.

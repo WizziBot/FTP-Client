@@ -15,6 +15,7 @@
 */
 
 #include <ControlConnection.h>
+#include <Commands.h>
 
 #define S_READY 220
 #define S_STATUS_INDICATOR 211
@@ -110,7 +111,9 @@ void ControlConnection::readDataUntilCode(char* stop_code){
         } else {
             if (isLineEnd && msg_recv_buffer[line_end] == '\n'){
                 // Check for stop code within line
-                if (msg_recv_buffer[line_start] == stop_code[0] && msg_recv_buffer[line_start+1] == stop_code[1] && msg_recv_buffer[line_start+2] == stop_code[2]) {
+                if (msg_recv_buffer[line_start] == stop_code[0] 
+                 && msg_recv_buffer[line_start+1] == stop_code[1]
+                 && msg_recv_buffer[line_start+2] == stop_code[2]) {
                     code_count++;
                 }
                 if (code_count == 2){
@@ -176,11 +179,49 @@ int ControlConnection::processResponseCode(){
     return isOpenToNewCommand;
 }
 
-void processUserCommand(string command){
+void ControlConnection::processUserCommand(string command){
     // TODO
     // Parse arguments from spaces
-    // switch case from base command, pass parameters if correct count
+    vector<string> cmd_split;
+    string temp;
+    stringstream cmd_stream(command);
+
+    while(getline(cmd_stream,temp)){
+        cmd_split.push_back(temp);
+    }
+
+    // Switch case from base command, pass parameters if correct count
+    
+
 }
+
+/*
+struct Math
+{
+    double sinFunc(double x) { return 0.33; };
+    double cosFunc(double x) { return 0.66; };
+};
+
+
+
+int main()
+{
+
+    math_func_map_t mapping;
+    mapping["sin"] = &Math::sinFunc;
+    mapping["cos"] = &Math::cosFunc;
+
+    std::string function = std::string("sin");
+    math_func_map_t::iterator x = mapping.find(function);
+    int result = 0;
+
+    if (x != mapping.end()) {
+        Math m;
+        result = (m.*(x->second))(20);
+    }
+}
+
+*/
 
 
 // TODO: Have command queue which queues the commands that need to be sent,
