@@ -189,39 +189,47 @@ void ControlConnection::processUserCommand(string command){
     while(getline(cmd_stream,temp)){
         cmd_split.push_back(temp);
     }
-
-    // Switch case from base command, pass parameters if correct count
     
+    // Switch case from base command, pass parameters if correct count
+    if (cmd_split.at(0) == "pwd"){
 
-}
-
-/*
-struct Math
-{
-    double sinFunc(double x) { return 0.33; };
-    double cosFunc(double x) { return 0.66; };
-};
-
-
-
-int main()
-{
-
-    math_func_map_t mapping;
-    mapping["sin"] = &Math::sinFunc;
-    mapping["cos"] = &Math::cosFunc;
-
-    std::string function = std::string("sin");
-    math_func_map_t::iterator x = mapping.find(function);
-    int result = 0;
-
-    if (x != mapping.end()) {
-        Math m;
-        result = (m.*(x->second))(20);
+    } else if (cmd_split.at(0) == "ls"){
+        Commands::list();
+    } else if (cmd_split.at(0) == "quit"){
+        Commands::quit();
+    } else if (cmd_split.at(0) == "help"){
+        Commands::help();
+    } else if (cmd_split.at(0) == "type"){
+        if (cmd_split.size() == 2){
+            Commands::type(cmd_split.at(1));
+        }
+    } else if (cmd_split.at(0) == "mode"){
+        if (cmd_split.size() == 2){
+            Commands::type(cmd_split.at(1));
+        }
+    } else if (cmd_split.at(0) == "get"){
+        if (cmd_split.size() == 3){
+            Commands::retr(cmd_split.at(1),cmd_split.at(2));
+        }
+    } else if (cmd_split.at(0) == "put"){
+        if (cmd_split.size() == 3){
+            Commands::stor(cmd_split.at(1),cmd_split.at(2));
+        }
+    } else if (cmd_split.at(0) == "system"){
+        Commands::syst();
+    } else if (cmd_split.at(0) == "delete"){
+        if (cmd_split.size() == 2){
+            Commands::type(cmd_split.at(1));
+        }
+    } else if (cmd_split.at(0) == "connect") {
+        if (cmd_split.size() == 2){
+            Commands::stor(cmd_split.at(1));
+        } else if (cmd_split.size() == 3) {
+            Commands::stor(cmd_split.at(1),cmd_split.at(2));
+        }
     }
-}
 
-*/
+}
 
 
 // TODO: Have command queue which queues the commands that need to be sent,
