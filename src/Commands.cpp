@@ -14,60 +14,94 @@
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-#include <Commands.h>
+#include <ControlConnection.h>
 
 namespace FTP {
 
-void Commands::connect(string server_addr_str,string port_str){
+using namespace std;
 
+string ControlConnection::getResponse() {
+    // MSG_PEEK to not disturb the buffer, MSG_WAITALL to ensure response code is received
+    if (recv(client_socket,msg_recv_buffer,4,MSG_PEEK | MSG_WAITALL) == -1){
+        cerr << "Error in receiving response to command: USER" << endl;
+        return "";
+    } else {
+        return processResponseCode();
+    }
 }
 
-void Commands::connect(string server_addr_str){
-
-}
-
-void conn(string server_addr_str,string port_str){
-
-}
-
-void Commands::pwd(){
-
-}
-
-void Commands::list(){
-
-}
-
-void Commands::quit(){
-
-}
-
-void Commands::help(){
-
-}
-
-void Commands::type(string t_type){
-
-}
-
-void Commands::mode(string t_mode){
-
-}
-
-void Commands::retr(string f_name,string f_dst){
-
-}
-
-void Commands::stor(string f_name,string f_dst){
-
-}
-
-void Commands::syst(){
-
-}
-
-void Commands::dele(string f_name){
+string ControlConnection::ftp_connect(string username,string password){
+    string cmd_string = "USER ";
+    cmd_string += username;
+    cmd_string += "\r\n";
+    send(client_socket,cmd_string.c_str(),cmd_string.length(),0);
     
+    string response = getResponse();
+    if (response.at(0) != '3'){
+        return response;
+    }
+    cmd_string = "PASS ";
+    cmd_string += password;
+    cmd_string += "\r\n";
+    send(client_socket,cmd_string.c_str(),cmd_string.length(),0);
+    string response2 = getResponse();
+    return response2;
+}
+
+string ControlConnection::pwd(){
+    char cmd_string[] = "PWD\r\n";
+    send(client_socket,cmd_string,sizeof(cmd_string)-1,0);
+    return getResponse();
+}
+
+string ControlConnection::cwd(string new_dir){
+    string cmd_string = "CWD ";
+    cmd_string += new_dir;
+    cmd_string += "\r\n";
+    send(client_socket,cmd_string.c_str(),cmd_string.length(),0);
+    return getResponse();
+}
+
+string ControlConnection::list(){
+    char cmd_string[] = "LIST\r\n";
+    send(client_socket,cmd_string,sizeof(cmd_string)-1,0);
+    return getResponse();
+}
+
+string ControlConnection::quit(){
+    char cmd_string[] = "QUIT\r\n";
+    send(client_socket,cmd_string,sizeof(cmd_string)-1,0);
+    return getResponse();
+}
+
+string ControlConnection::help(){
+    char cmd_string[] = "HELP\r\n";
+    send(client_socket,cmd_string,sizeof(cmd_string)-1,0);
+    return getResponse();
+}
+
+string ControlConnection::type(string t_type){
+    return "";
+}
+
+string ControlConnection::mode(string t_mode){
+    return "";
+}
+
+string ControlConnection::retr(string f_name,string f_dst){
+    return "";
+}
+
+string ControlConnection::stor(string f_name,string f_dst){
+    return "";
+}
+
+string ControlConnection::syst(){
+    return "";
+}
+
+string ControlConnection::dele(string f_name){
+    return "";
 }
 
 }

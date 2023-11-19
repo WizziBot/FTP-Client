@@ -52,26 +52,26 @@ DataConnection::DataConnection(uint32_t control_addr){
 
 // Passive connection
 DataConnection::DataConnection(string dst_address){
-    client_socket = socket(AF_INET, SOCK_STREAM, 0);
-    if (client_socket == -1) {
-        perror("Error creating socket");
-        exit(1);
-    }
-    // Parse address
-    // First 4 bytes are address and last 2 are port information
-    // in the format (h1,h2,h3,h4,p1,p2)
-    uint32_t dst_ip;
-    uint16_t dst_port;
-    for (string::iterator ci = dst_address.begin(); ci != dst_address.end(); ci++){
-        char c = *ci;
-        // Do parsing stuff
-        // Check from ( to )
-        // separate sections by comma
-    }
+    // client_socket = socket(AF_INET, SOCK_STREAM, 0);
+    // if (client_socket == -1) {
+    //     perror("Error creating socket");
+    //     exit(1);
+    // }
+    // // Parse address
+    // // First 4 bytes are address and last 2 are port information
+    // // in the format (h1,h2,h3,h4,p1,p2)
+    // uint32_t dst_ip;
+    // uint16_t dst_port;
+    // for (string::iterator ci = dst_address.begin(); ci != dst_address.end(); ci++){
+    //     // char c = *ci;
+    //     // Do parsing stuff
+    //     // Check from ( to )
+    //     // separate sections by comma
+    // }
 
-    server_addr.sin_family = AF_INET;
-    server_addr.sin_port = htons(dst_port);
-    server_addr.sin_addr.s_addr = htonl(dst_ip);
+    // server_addr.sin_family = AF_INET;
+    // server_addr.sin_port = htons(dst_port);
+    // server_addr.sin_addr.s_addr = htonl(dst_ip);
 }
 
 DataConnection::~DataConnection(){

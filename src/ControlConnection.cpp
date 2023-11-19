@@ -15,18 +15,6 @@
 */
 
 #include <ControlConnection.h>
-#include <Commands.h>
-
-#define S_READY 220
-#define S_STATUS_INDICATOR 211
-#define S_GOODBYE 221
-#define S_PASSIVE_MODE 227
-
-#define D1_PRELIMINARY '1'
-#define D1_COMPLETION '2'
-#define D1_INTERMEDIATE '3'
-#define D1_TRANSIENT_NEGATIVE '4'
-#define D1_FAILURE '5'
 
 // Checks for digit between 0 and 9 inclusive
 #define isDigit(x) (x >= 0x30 && x <= 0x39)
@@ -53,29 +41,17 @@ ControlConnection::~ControlConnection(){
     }
 }
 
-pair<int,string> ControlConnection::fromTelnet(char* buff,int buff_len){
-    char s_code[4] = {0,0,0,0};
+string ControlConnection::fromTelnet(char* buff,int buff_len){
     char s_msg[1024] = {0};
-    int code;
-    int isTelnet = 0;
     for (int i=0; i<buff_len; i++){
-        if (i<3) s_code[i] = buff[i];
         if (buff[i] == '\r') {
             s_msg[i] = '\0';
-            isTelnet = 1;
             break;
         }
         s_msg[i] = buff[i];
     }
-
-    if (isTelnet == 0) {return make_pair(-2,string(s_msg));}
-    try {
-        code = stoi(s_code);
-    } catch(const std::invalid_argument& e) {
-        code = -1;
-    }
     
-    return make_pair(code,string(s_msg));
+    return string(s_msg);
 }
 
 string ControlConnection::toTelnet(string command){
@@ -83,7 +59,7 @@ string ControlConnection::toTelnet(string command){
 }
 
 // Reads from the start of long response till the end of it by reading the stop_code twice
-// RFC 4.2:
+// RFC 959 section 4.2:
 /*
     Thus the format for multi-line replies is that the first line
     will begin with the exact required reply code, followed
@@ -98,7 +74,7 @@ string ControlConnection::toTelnet(string command){
             234 A line beginning with numbers
         123 The last line
 */
-void ControlConnection::readDataUntilCode(char* stop_code){
+string ControlConnection::readDataUntilCode(char* stop_code){
     int bytes_received = 1;
     int line_start = 0;
     int line_end = 0;
@@ -129,128 +105,112 @@ void ControlConnection::readDataUntilCode(char* stop_code){
 
         }
     }
-    
-    cout << msg_recv_buffer;
+    return string(msg_recv_buffer);
 }
 
 // TODO: Implement function map
-int ControlConnection::processResponseCode(){
-    int isOpenToNewCommand = 1;
+string ControlConnection::processResponseCode(){
     char* s_code = msg_recv_buffer;
     // Return if s_code does not contain a response code
     if (!isDigit(s_code[0]) || !isDigit(s_code[1]) || !isDigit(s_code[2])){
         perror("Bad response code\n");
-        return 1;
+        return "";
     }
-    if (s_code[0] == D1_PRELIMINARY){
-        isOpenToNewCommand = 1;
-    }
-    // Convert code to integer for easy mapping
+
     if (s_code[3] == '-'){
-        readDataUntilCode(s_code);
+        return readDataUntilCode(s_code);
     } else {
         int r_code = stoi(s_code);
         cout << "CODE: " << r_code << endl;
         switch (r_code) {
         case S_GOODBYE:
-            cout << "221 Goodbye" << endl;
             conn_status = CONN_TERM;
             close(client_socket);
-            break;
+            return string("221 Goodbye\n");
         case S_PASSIVE_MODE:
             if (recv(client_socket,msg_recv_buffer,sizeof(msg_recv_buffer),0) == -1){
                 perror("Error in receiving passive mode information\n");
             } else {
-                pair<int,string> r_message = fromTelnet(msg_recv_buffer,sizeof(msg_recv_buffer));
-                data_connection = new DataConnection(r_message.second);
+                string r_message = fromTelnet(msg_recv_buffer,sizeof(msg_recv_buffer));
+                data_connection = new DataConnection(r_message);
             }
             break;
         default:
-            cout << "[Unknown response code]: " << r_code << endl;
             if (recv(client_socket,msg_recv_buffer,sizeof(msg_recv_buffer),0) == -1){
                 perror("Error in receiving server hello\n");
             } else {
-                pair<int,string> r_message = fromTelnet(msg_recv_buffer,sizeof(msg_recv_buffer));
-                cout << r_message.second << endl;
+                string r_message = fromTelnet(msg_recv_buffer,sizeof(msg_recv_buffer));
+                return r_message;
             }
             break;
         }
     }
-    return isOpenToNewCommand;
+    return "";
 }
 
-void ControlConnection::processUserCommand(string command){
+string ControlConnection::processUserCommand(string command){
     // TODO
     // Parse arguments from spaces
     vector<string> cmd_split;
     string temp;
     stringstream cmd_stream(command);
 
-    while(getline(cmd_stream,temp)){
+    while(getline(cmd_stream,temp,' ')){
         cmd_split.push_back(temp);
     }
-    
+
     // Switch case from base command, pass parameters if correct count
     if (cmd_split.at(0) == "pwd"){
-
+        return pwd();
+    } else if (cmd_split.at(0) == "cd"){
+        if (cmd_split.size() == 2){
+            return cwd(cmd_split.at(1));
+        }
     } else if (cmd_split.at(0) == "ls"){
-        Commands::list();
+        return list();
     } else if (cmd_split.at(0) == "quit"){
-        Commands::quit();
+        return quit();
     } else if (cmd_split.at(0) == "help"){
-        Commands::help();
+        return help();
     } else if (cmd_split.at(0) == "type"){
         if (cmd_split.size() == 2){
-            Commands::type(cmd_split.at(1));
+            return type(cmd_split.at(1));
         }
     } else if (cmd_split.at(0) == "mode"){
         if (cmd_split.size() == 2){
-            Commands::type(cmd_split.at(1));
+            return type(cmd_split.at(1));
         }
     } else if (cmd_split.at(0) == "get"){
         if (cmd_split.size() == 3){
-            Commands::retr(cmd_split.at(1),cmd_split.at(2));
+            return retr(cmd_split.at(1),cmd_split.at(2));
         }
     } else if (cmd_split.at(0) == "put"){
         if (cmd_split.size() == 3){
-            Commands::stor(cmd_split.at(1),cmd_split.at(2));
+            return stor(cmd_split.at(1),cmd_split.at(2));
         }
     } else if (cmd_split.at(0) == "system"){
-        Commands::syst();
+        return syst();
     } else if (cmd_split.at(0) == "delete"){
         if (cmd_split.size() == 2){
-            Commands::type(cmd_split.at(1));
+            return type(cmd_split.at(1));
         }
     } else if (cmd_split.at(0) == "connect") {
-        if (cmd_split.size() == 2){
-            Commands::stor(cmd_split.at(1));
-        } else if (cmd_split.size() == 3) {
-            Commands::stor(cmd_split.at(1),cmd_split.at(2));
+        if (cmd_split.size() == 3) {
+            return ftp_connect(cmd_split.at(1),cmd_split.at(2));
         }
+        return string("Requires 2 arguments.");
     }
+    return string("Unknown Command");
 
 }
 
-
-// TODO: Have command queue which queues the commands that need to be sent,
-// if no queued commands then user input is taken.
 void ControlConnection::interactive(){
-    int openToNewCommands = 1;
     while (conn_status == CONN_SUCCESS){
         string command;
-        if (openToNewCommands == 1){
-            cout << ">";
-            getline(cin, command);
-            string send_command = toTelnet(command);
-            send(client_socket,send_command.c_str(),send_command.length(),0);
-        }
-        // MSG_PEEK to not disturb the buffer, MSG_WAITALL to ensure response code is received
-        if (recv(client_socket,msg_recv_buffer,4,MSG_PEEK | MSG_WAITALL) == -1){
-            cerr << "Error in receiving response to command:" << endl;
-            cerr << command << endl;
-        } else {
-            openToNewCommands = processResponseCode();
-        }
+        cout << ">";
+        getline(cin, command);
+        string response = processUserCommand(command);
+        if (response != "") cout << response << endl;
     }
 }
 
@@ -265,16 +225,16 @@ int ControlConnection::initConnection(){
         return -1;
     }
     // Check status code
-    pair<int,string> r_message = fromTelnet(msg_recv_buffer,sizeof(msg_recv_buffer));
-    cout << r_message.second << endl;
-    if (r_message.first != S_READY){
+    string r_message = fromTelnet(msg_recv_buffer,sizeof(msg_recv_buffer));
+    cout << r_message << endl;
+    if (r_message.at(0) != '2'){
         perror("Error in receiving server hello");
+        conn_status = CONN_FAILED;
         close(client_socket);
         return -1;
     }
     conn_status = CONN_SUCCESS;
     return 0;
 }
-
 
 }

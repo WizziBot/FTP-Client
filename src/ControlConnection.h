@@ -16,6 +16,17 @@
 
 #pragma once
 
+#define S_READY 220
+#define S_STATUS_INDICATOR 211
+#define S_GOODBYE 221
+#define S_PASSIVE_MODE 227
+
+#define D1_PRELIMINARY '1'
+#define D1_COMPLETION '2'
+#define D1_INTERMEDIATE '3'
+#define D1_TRANSIENT_NEGATIVE '4'
+#define D1_FAILURE '5'
+
 #include <iostream>
 #include <stdio.h>
 #include <stdlib.h>
@@ -56,22 +67,43 @@ eConnStatus getConStatus(){return conn_status;}
 
 private:
 
-void readDataUntilCode(char* stop_code);
+string ftp_connect(string username,string password);
+string ftp_connect(string username);
+
+string pwd();
+string list();
+string quit();
+string help();
+string type(string t_type);
+string mode(string t_mode);
+string retr(string f_name,string f_dst);
+string stor(string f_name,string f_dst);
+string syst();
+string dele(string f_name);
+string cwd(string new_dir);
+string getResponse();
+
+/*
+    Processes multiple message responses
+    @returns the whole response as a string 
+*/
+string readDataUntilCode(char* stop_code);
 
 /*
     Process the response code in the msg_recv_buffer
 */
-int processResponseCode();
+string processResponseCode();
 
 /*
     Process the user command by separating it into stem and arguments
+    @returns the response from the server to be printer/processed otherwise
 */
-static void processUserCommand(string command);
+string processUserCommand(string command);
 
 /*  Parse a Telnet string which is terminated by \r\n
-    @returns null terminated response string and response code as a pair.
+    @returns null terminated response string;
 */
-pair<int,string> fromTelnet(char* buff,int buff_len);
+string fromTelnet(char* buff,int buff_len);
 
 /*  Put a string into telnet format ready to be sent.
     @param command null terminated command
