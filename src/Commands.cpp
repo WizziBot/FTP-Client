@@ -37,7 +37,7 @@ string ControlConnection::ftp_connect(string username,string password){
     send(client_socket,cmd_string.c_str(),cmd_string.length(),0);
     
     string response = getResponse();
-    if (response.at(0) != '3'){
+    if (response.size() == 0 || response.at(0) != D1_INTERMEDIATE){
         return response;
     }
     cmd_string = "PASS ";
@@ -81,27 +81,52 @@ string ControlConnection::help(){
 }
 
 string ControlConnection::type(string t_type){
-    return "";
+    string cmd_string = "TYPE ";
+    cmd_string += t_type;
+    cmd_string += "\r\n";
+    send(client_socket,cmd_string.c_str(),cmd_string.length(),0);
+    return getResponse();
 }
 
 string ControlConnection::mode(string t_mode){
-    return "";
-}
-
-string ControlConnection::retr(string f_name,string f_dst){
-    return "";
-}
-
-string ControlConnection::stor(string f_name,string f_dst){
-    return "";
+    string cmd_string = "MODE ";
+    cmd_string += t_mode;
+    cmd_string += "\r\n";
+    send(client_socket,cmd_string.c_str(),cmd_string.length(),0);
+    return getResponse();
 }
 
 string ControlConnection::syst(){
-    return "";
+    char cmd_string[] = "SYST\r\n";
+    send(client_socket,cmd_string,sizeof(cmd_string)-1,0);
+    return getResponse();
 }
 
 string ControlConnection::dele(string f_name){
-    return "";
+    string cmd_string = "DELE ";
+    cmd_string += f_name;
+    cmd_string += "\r\n";
+    send(client_socket,cmd_string.c_str(),cmd_string.length(),0);
+    return getResponse();
+}
+
+// Do work on these functions when we get onto Data Connection
+string ControlConnection::retr(string f_name,string f_dst){
+    string cmd_string = "RETR ";
+    if (f_dst.size() == 0) cmd_string += f_name;
+    else cmd_string += f_name + " " + f_dst;
+    cmd_string += "\r\n";
+    send(client_socket,cmd_string.c_str(),cmd_string.length(),0);
+    return getResponse();
+}
+
+string ControlConnection::stor(string f_name,string f_dst){
+    string cmd_string = "STOR ";
+    if (f_dst.size() == 0) cmd_string += f_name;
+    else cmd_string += f_name + " " + f_dst;
+    cmd_string += "\r\n";
+    send(client_socket,cmd_string.c_str(),cmd_string.length(),0);
+    return getResponse();
 }
 
 }
