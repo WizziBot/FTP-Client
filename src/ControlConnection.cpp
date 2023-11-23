@@ -133,6 +133,7 @@ string ControlConnection::processResponseCode(){
             } else {
                 string r_message = fromTelnet(msg_recv_buffer,sizeof(msg_recv_buffer));
                 data_connection = new DataConnection(r_message);
+                return r_message;
             }
             break;
         default:

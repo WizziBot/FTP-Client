@@ -113,17 +113,16 @@ string ControlConnection::dele(string f_name){
 // Do work on these functions when we get onto Data Connection
 string ControlConnection::retr(string f_name,string f_dst){
     string cmd_string = "RETR ";
-    if (f_dst.size() == 0) cmd_string += f_name;
-    else cmd_string += f_name + " " + f_dst;
+    cmd_string += f_name;
     cmd_string += "\r\n";
     send(client_socket,cmd_string.c_str(),cmd_string.length(),0);
-    return getResponse();
+    
+    string response = getResponse();
 }
 
 string ControlConnection::stor(string f_name,string f_dst){
     string cmd_string = "STOR ";
-    if (f_dst.size() == 0) cmd_string += f_name;
-    else cmd_string += f_name + " " + f_dst;
+    cmd_string += f_dst;
     cmd_string += "\r\n";
     send(client_socket,cmd_string.c_str(),cmd_string.length(),0);
     return getResponse();

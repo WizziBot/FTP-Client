@@ -28,6 +28,7 @@
 #define D1_FAILURE '5'
 
 #include <iostream>
+#include <string.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
@@ -116,7 +117,7 @@ int client_socket;
 struct sockaddr_in server_addr;
 char msg_recv_buffer[1024];
 
-DataConnection* data_connection;
+DataConnection* data_connection = NULL;
 };
  
 }
