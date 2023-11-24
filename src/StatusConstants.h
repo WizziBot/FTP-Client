@@ -15,3 +15,8 @@ enum eConnStatus {
     CONN_SUCCESS,
     CONN_TERM
 };
+
+enum eDataMode {
+    DATA_ACTIVE,
+    DATA_PASSIVE
+};

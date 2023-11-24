@@ -20,36 +20,6 @@ namespace FTP {
 
 using namespace std;
 
-// Active connection
-// TODO:  send port information via PORT command
-DataConnection::DataConnection(uint32_t control_addr){
-    client_socket = socket(AF_INET, SOCK_STREAM, 0);
-    if (client_socket == -1) {
-        perror("Error creating socket");
-        conn_status = CONN_FAILED;
-    }
-    server_addr.sin_family = AF_INET;
-    server_addr.sin_addr.s_addr = control_addr;
-    int connected = 0;
-    while (!connected){
-        // Randomly generated number for port
-        int rand_port = rand()%(DATA_PORT_MAX-DATA_PORT_MIN + 1) + DATA_PORT_MIN;
-        
-        server_addr.sin_port = htons(rand_port);
-
-        if (bind(client_socket, (struct sockaddr*)&server_addr, sizeof(server_addr)) == -1) {
-            perror("Error binding data connection port.");
-        } else {
-            connected = 1;
-        }
-    }
-
-    if (listen(client_socket, 1) == -1) {
-        perror("Error listening on data connection");
-        close(client_socket);
-        conn_status = CONN_FAILED;
-    }
-}
 
 // Passive connection
 DataConnection::DataConnection(string dst_address){
@@ -81,7 +51,7 @@ DataConnection::DataConnection(string dst_address){
                 is_reading = 0;
                 // Allow case fall through to process last byte
             case ',':
-                *dstptr = atoi(curr_byte_str);
+                *dstptr = (uint8_t)atoi(curr_byte_str);
                 memset(curr_byte_str,0,sizeof(curr_byte_str));
                 cbptr = curr_byte_str;
                 if (byte_number == 3) dstptr = (uint8_t*)&dst_port;
@@ -101,6 +71,13 @@ DataConnection::DataConnection(string dst_address){
     server_addr.sin_family = AF_INET;
     server_addr.sin_port = htons(dst_port);
     server_addr.sin_addr.s_addr = htonl(dst_ip);
+
+    if(connect(client_socket,(struct sockaddr*)&server_addr, sizeof(server_addr)) == -1){
+        conn_status = CONN_TERM;
+        close(client_socket);
+        return;
+    }
+    conn_status = CONN_SUCCESS;
 }
 
 DataConnection::~DataConnection(){

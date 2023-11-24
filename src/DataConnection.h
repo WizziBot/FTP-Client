@@ -33,16 +33,15 @@ class DataConnection {
 
 public:
 
-/*  Defines an FTP active data connection
-    @param control_addr address of server
-*/
-DataConnection(uint32_t control_addr);
-
 /*  Defines an FTP passive data connection
     @param dst_address FTP address string received from server
 */
 DataConnection(string dst_address);
 ~DataConnection();
+
+eConnStatus getStatus(){
+    return conn_status;
+}
 
 private:
 

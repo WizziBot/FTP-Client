@@ -112,12 +112,19 @@ string ControlConnection::dele(string f_name){
 
 // Do work on these functions when we get onto Data Connection
 string ControlConnection::retr(string f_name,string f_dst){
-    string cmd_string = "RETR ";
-    cmd_string += f_name;
-    cmd_string += "\r\n";
-    send(client_socket,cmd_string.c_str(),cmd_string.length(),0);
-    
-    string response = getResponse();
+    // Only passive mode 
+    if (data_mode == DATA_PASSIVE){
+        string cmd_string = "PASV\r\n";
+        send(client_socket,cmd_string.c_str(),cmd_string.length(),0);
+        string response = getResponse();
+        if (response.size() == 0 || response.at(0) != D1_COMPLETION){
+            return response;
+        }
+        data_connection = new DataConnection(response);
+        if (data_connection->getStatus() != CONN_SUCCESS) {
+            return string("Data connection failed");
+        }
+    }
 }
 
 string ControlConnection::stor(string f_name,string f_dst){

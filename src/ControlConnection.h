@@ -112,6 +112,7 @@ string fromTelnet(char* buff,int buff_len);
 */
 string toTelnet(string command);
 
+eDataMode data_mode = DATA_PASSIVE;
 eConnStatus conn_status = CONN_NOT_INIT;
 int client_socket;
 struct sockaddr_in server_addr;
