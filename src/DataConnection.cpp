@@ -87,4 +87,12 @@ DataConnection::~DataConnection(){
     }
 }
 
+int DataConnection::dsend(const vector<char> &buffer){
+    return send(client_socket,buffer.data(),buffer.size(),0);
+}
+
+int DataConnection::dsend(const string &buffer){
+    return send(client_socket,buffer.c_str(),buffer.length(),0);
+}
+
 }

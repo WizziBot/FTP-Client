@@ -20,3 +20,8 @@ enum eDataMode {
     DATA_ACTIVE,
     DATA_PASSIVE
 };
+
+enum eDataType {
+    DATA_ASCII,
+    DATA_BINARY
+};

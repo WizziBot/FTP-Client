@@ -68,20 +68,67 @@ eConnStatus getConStatus(){return conn_status;}
 
 private:
 
-string ftp_connect(string username,string password);
-string ftp_connect(string username);
-
+/*
+    Send USER and PASS commands to login.
+*/
+string ftp_login(string username,string password);
+/*
+    Print working directory
+*/
 string pwd();
+/*
+    Lists directory contents
+*/
 string list();
+/*
+    Terminate connection and exit program.
+*/
 string quit();
+/*
+    Print list of available commands
+*/
 string help();
+/*
+    Changes data type of transfer data (ASCII, IMAGE, EBCDIC)
+    (EBCDIC not implemented)
+    @param t_type data type
+*/
 string type(string t_type);
-string mode(string t_mode);
-string retr(string f_name,string f_dst);
-string stor(string f_name,string f_dst);
+/*
+    Changes mode of transfer (stream, block, compressed)
+    (Not implemented)
+    @param t_mode mode
+*/
+string mode(const string t_mode);
+/*
+    Copies remote file to local machine
+    @param f_name remote file name
+    @param f_dst local file name
+*/
+string retr(const string f_name,const string f_dst);
+/*
+    Copies local file to server
+    @param f_name local file path
+    @param f_dst remote file name
+*/
+string stor(const string f_name,const string f_dst);
+/*
+    Requests system information via control connection
+*/
 string syst();
-string dele(string f_name);
-string cwd(string new_dir);
+/*
+    Deletes file on remote server
+    @param f_name name of remote file
+*/
+string dele(const string f_name);
+/*
+    Change working directory
+*/
+string cwd(const string new_dir);
+
+/*
+    Receive server response and return it to the caller as a string
+*/
 string getResponse();
 
 /*
@@ -113,6 +160,7 @@ string fromTelnet(char* buff,int buff_len);
 string toTelnet(string command);
 
 eDataMode data_mode = DATA_PASSIVE;
+eDataType data_type = DATA_ASCII;
 eConnStatus conn_status = CONN_NOT_INIT;
 int client_socket;
 struct sockaddr_in server_addr;

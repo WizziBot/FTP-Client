@@ -22,6 +22,7 @@
 #include <unistd.h>
 #include <arpa/inet.h>
 #include <string.h>
+#include <vector>
 
 #include <StatusConstants.h>
 
@@ -39,6 +40,17 @@ public:
 DataConnection(string dst_address);
 ~DataConnection();
 
+/*
+    Read from buffer and write it to data connection socket
+    @param buffer char vector with file contents
+*/
+int dsend(const vector<char> &buffer);
+/*
+    Read from buffer and write it to data connection socket
+    @param buffer string with text file contents
+*/
+int dsend(const string &buffer);
+
 eConnStatus getStatus(){
     return conn_status;
 }
@@ -48,8 +60,6 @@ private:
 eConnStatus conn_status = CONN_NOT_INIT;
 int client_socket;
 struct sockaddr_in server_addr;
-char msg_recv_buffer[1024];
-char address_info[32];
 };
 
 }

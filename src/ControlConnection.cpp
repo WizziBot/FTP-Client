@@ -195,11 +195,13 @@ string ControlConnection::processUserCommand(string command){
         if (cmd_split.size() == 2){
             return type(cmd_split.at(1));
         }
-    } else if (cmd_split.at(0) == "connect") {
+    } else if (cmd_split.at(0) == "login") {
         if (cmd_split.size() == 3) {
-            return ftp_connect(cmd_split.at(1),cmd_split.at(2));
+            return ftp_login(cmd_split.at(1),cmd_split.at(2));
+        } else if (cmd_split.size() == 2){
+            return ftp_login(cmd_split.at(1),string());
         }
-        return string("Requires 2 arguments.");
+        return string("Insufficient arguments");
     }
     return string("Unknown Command");
 
