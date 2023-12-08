@@ -31,8 +31,8 @@ DataConnection::DataConnection(string dst_address){
     // Parse address
     // First 4 bytes are address and last 2 are port information
     // in the format (h1,h2,h3,h4,p1,p2) where h1-h4, p1-p2 are string representations of bytes
-    uint32_t dst_ip;
-    uint16_t dst_port;
+    uint32_t dst_ip=0;
+    uint16_t dst_port=0;
     // Points to 8-bit segments of the dst_ip 32-bit ip addr or 16-bit port
     uint8_t *dstptr = (uint8_t*)(&dst_ip);
 
@@ -51,32 +51,33 @@ DataConnection::DataConnection(string dst_address){
                 is_reading = 0;
                 // Allow case fall through to process last byte
             case ',':
-                *dstptr = (uint8_t)atoi(curr_byte_str);
-                memset(curr_byte_str,0,sizeof(curr_byte_str));
-                cbptr = curr_byte_str;
-                if (byte_number == 3) dstptr = (uint8_t*)&dst_port;
+                *dstptr = (uint8_t)atoi(curr_byte_str); // Assign currently stored string as a number to the location of dstptr
+                memset(curr_byte_str,0,sizeof(curr_byte_str)); // Clear char array
+                cbptr = curr_byte_str; // update cbptr to the start of the char array
+                if (byte_number == 3) dstptr = (uint8_t*)&dst_port; // if were on the 3rd index byte then finished getting ip
                 else dstptr++;
                 byte_number++;
                 break;
             default:
-                *cbptr = c;
+                *cbptr = c; // By default append character to char array
                 cbptr++;
                 break;
             }
         }
 
         if (c == '(' && is_reading == 0) is_reading = 1;
-    }
+    }   
 
     server_addr.sin_family = AF_INET;
-    server_addr.sin_port = htons(dst_port);
-    server_addr.sin_addr.s_addr = htonl(dst_ip);
+    server_addr.sin_port = dst_port;
+    server_addr.sin_addr.s_addr = dst_ip;
 
     if(connect(client_socket,(struct sockaddr*)&server_addr, sizeof(server_addr)) == -1){
         conn_status = CONN_TERM;
         close(client_socket);
         return;
     }
+
     conn_status = CONN_SUCCESS;
 }
 
@@ -84,6 +85,7 @@ DataConnection::~DataConnection(){
     if (conn_status == CONN_SUCCESS){
         conn_status = CONN_TERM;
         close(client_socket);
+        cout << "Dcon term" << endl;
     }
 }
 

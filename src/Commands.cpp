@@ -183,7 +183,6 @@ string ControlConnection::stor(const string f_name,const string f_dst){
     if (data_connection->getStatus() != CONN_SUCCESS) {
         return string("Data connection failed");
     }
-
     // Send store request
     cmd_string = "STOR ";
     cmd_string += f_dst;
@@ -192,7 +191,7 @@ string ControlConnection::stor(const string f_name,const string f_dst){
     response = getResponse();
 
     // Receive OK response from server
-    if (response.size() == 0 || response.at(1) != D1_PRELIMINARY){
+    if (response.size() == 0 || response.at(0) != D1_PRELIMINARY){
         return response;
     }
 
@@ -230,11 +229,13 @@ string ControlConnection::stor(const string f_name,const string f_dst){
             buffer += line;
         }
 
+        cout << "Buffer: " << buffer << endl;
+
         data_connection->dsend(buffer);
         delete data_connection;
     }
-    
-    return string("Done");
+
+    return getResponse();
 }
 
 string ControlConnection::retr(string f_name,string f_dst){

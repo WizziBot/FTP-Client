@@ -127,18 +127,9 @@ string ControlConnection::processResponseCode(){
             conn_status = CONN_TERM;
             close(client_socket);
             return string("221 Goodbye\n");
-        case S_PASSIVE_MODE:
-            if (recv(client_socket,msg_recv_buffer,sizeof(msg_recv_buffer),0) == -1){
-                perror("Error in receiving passive mode information\n");
-            } else {
-                string r_message = fromTelnet(msg_recv_buffer,sizeof(msg_recv_buffer));
-                data_connection = new DataConnection(r_message);
-                return r_message;
-            }
-            break;
         default:
             if (recv(client_socket,msg_recv_buffer,sizeof(msg_recv_buffer),0) == -1){
-                perror("Error in receiving server hello\n");
+                perror("Error in receiving server response\n");
             } else {
                 string r_message = fromTelnet(msg_recv_buffer,sizeof(msg_recv_buffer));
                 return r_message;
