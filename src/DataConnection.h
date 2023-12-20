@@ -50,6 +50,11 @@ int dsend(const vector<char> &buffer);
     @param buffer string with text file contents
 */
 int dsend(const string &buffer);
+/*
+    Reads from ongoing data connection and returns the received bytes.
+    @param size number of bytes to read from connection
+*/
+vector<char> drecv(int size);
 
 eConnStatus getStatus(){
     return conn_status;

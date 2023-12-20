@@ -110,7 +110,11 @@ string ControlConnection::type(string t_type){
         return string("Invalid or Unsuported Type");
     }
     send(client_socket,cmd_string.c_str(),cmd_string.length(),0);
-    return getResponse();
+    string response = getResponse();
+    if (response.at(0) == D1_COMPLETION){
+        data_type = DATA_BINARY;
+    }
+    return response;
 }
 
 string ControlConnection::mode(const string t_mode){
@@ -263,13 +267,45 @@ string ControlConnection::retr(string f_name,string f_dst){
     response = getResponse();
 
     // Receive OK response from server
-    if (response.size() == 0 || response.at(1) != D1_PRELIMINARY){
+    if (response.size() == 0 || response.at(0) != D1_PRELIMINARY){
+        delete data_connection;
         return response;
     }
 
-    // Store received data to file (TODO)
+    // Get size of payload
+    char size_str[32] = {0};
+    int parameter_index = response.find('(') + 1;
+    char c = 0;
+    for (int i=0; i < (int)sizeof(size_str) && parameter_index < (int)response.size(); i++,parameter_index++){
+        c = response.at(parameter_index);
+        if (c == ')') break;
+        size_str[i] = c;
+    }
+    int size_bytes = atoi(size_str);
+    if (size_bytes <= 0){ // Check that a valid size is parsed
+        delete data_connection;
+        return response;
+    }
 
-    return string("");
+    // Receive payload through data connection
+
+    vector<char> data_to_write = data_connection->drecv(size_bytes);
+    delete data_connection;
+    
+    cout << "Writing " << data_to_write.size() << " bytes to " << f_dst << endl;
+
+    if (data_type == DATA_BINARY){
+        // Setup file io stream in binary mode then write to it and finally close
+        ofstream file(f_dst.c_str(),std::ios::binary);
+        file.write(data_to_write.data(),data_to_write.size());
+        file.close();
+    } else if (data_type == DATA_ASCII) {
+        ofstream file(f_dst.c_str());
+        file.write(data_to_write.data(),data_to_write.size());
+        file.close();
+    }
+
+    return getResponse();
 }
 
 }

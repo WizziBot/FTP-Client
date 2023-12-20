@@ -170,7 +170,7 @@ string ControlConnection::processUserCommand(string command){
         }
     } else if (cmd_split.at(0) == "mode"){
         if (cmd_split.size() == 2){
-            return type(cmd_split.at(1));
+            return mode(cmd_split.at(1));
         }
     } else if (cmd_split.at(0) == "get"){
         if (cmd_split.size() == 3){
@@ -184,7 +184,7 @@ string ControlConnection::processUserCommand(string command){
         return syst();
     } else if (cmd_split.at(0) == "delete"){
         if (cmd_split.size() == 2){
-            return type(cmd_split.at(1));
+            return dele(cmd_split.at(1));
         }
     } else if (cmd_split.at(0) == "login") {
         if (cmd_split.size() == 3) {
