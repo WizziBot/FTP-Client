@@ -140,35 +140,39 @@ string ControlConnection::dele(string f_name){
 */
 
 string ControlConnection::list(){
-    // Only passive mode 
+    // Similar method to retr()
     if (data_mode != DATA_PASSIVE) return string("");
 
-    // Activate passive mode on server
     string cmd_string = "PASV\r\n";
     send(client_socket,cmd_string.c_str(),cmd_string.length(),0);
     string response = getResponse();
     if (response.size() == 0 || response.at(0) != D1_COMPLETION){
         return response;
     }
-    // Initiate data connection
+
     data_connection = new DataConnection(response);
     if (data_connection->getStatus() != CONN_SUCCESS) {
         return string("Data connection failed");
     }
 
-    // Send store request
     cmd_string = "LIST\r\n";
     send(client_socket,cmd_string.c_str(),cmd_string.length(),0);
     response = getResponse();
 
-    // Receive OK response from server
-    if (response.size() == 0 || response.at(1) != D1_PRELIMINARY){
+    if (response.size() == 0 || response.at(0) != D1_PRELIMINARY){
+        delete data_connection;
         return response;
     }
-
-    // Print received data to console (TODO)
     
-    return string("");
+    vector<char> data_to_write = data_connection->drecv_eof();
+    delete data_connection;
+
+    string stdout_data(data_to_write.begin(),data_to_write.end());
+    
+    cout << stdout_data << endl;
+
+    return getResponse();
+
 }
 
 string ControlConnection::stor(const string f_name,const string f_dst){

@@ -26,6 +26,8 @@
 
 #include <StatusConstants.h>
 
+#define SOCKET_READ_TIMEOUT_USEC 100000
+
 namespace FTP {
 
 using namespace std;
@@ -55,6 +57,11 @@ int dsend(const string &buffer);
     @param size number of bytes to read from connection
 */
 vector<char> drecv(int size);
+
+/*
+    Reads from the data connection until EOF.
+*/
+vector<char> drecv_eof();
 
 eConnStatus getStatus(){
     return conn_status;

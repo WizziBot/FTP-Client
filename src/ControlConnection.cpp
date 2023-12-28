@@ -59,9 +59,9 @@ string ControlConnection::toTelnet(string command){
 }
 
 // Reads from the start of long response till the end of it by reading the stop_code twice
-// RFC 959 section 4.2:
+// (RFC 959) 4.2. FTP REPLIES
 /*
-    Thus the format for multi-line replies is that the first line
+    ... Thus the format for multi-line replies is that the first line
     will begin with the exact required reply code, followed
     immediately by a Hyphen, "-" (also known as Minus), followed by
     text.  The last line will begin with the same code, followed

@@ -106,4 +106,36 @@ vector<char> DataConnection::drecv(int size){
     return recv_buf;
 }
 
+vector<char> DataConnection::drecv_eof(){
+    if (conn_status != CONN_SUCCESS) return vector<char>();
+    vector<char> recv_buf(1024);
+    char temp;
+    while (1) {
+        int n_bytes = recv(client_socket,&temp,sizeof(char),0);
+        switch (n_bytes)
+        {
+        case -1:
+            cerr << "Failed to read from data connection." << endl;
+            recv_buf.shrink_to_fit();
+            return recv_buf;
+            break;
+        case 0:
+            // EOF implied by closing of data connection.
+            /* (RFC 959) 3.4.  TRANSMISSION MODES
+                ... All data transfers must be completed with an end-of-file (EOF)
+                which may be explicitly stated or implied by the closing of the
+                data connection.  For files with record structure, all the
+                end-of-record markers (EOR) are explicit, including the final one.
+                For files transmitted in page structure a "last-page" page type is
+                used.
+            */
+            return recv_buf;
+            break;
+        default:
+            recv_buf.push_back(temp);
+        }
+    }
+    return recv_buf;
+}
+
 }
