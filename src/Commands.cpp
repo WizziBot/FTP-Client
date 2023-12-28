@@ -88,12 +88,15 @@ string ControlConnection::quit(){
 
 string ControlConnection::help(){
     static string help_cmds = 
-    "> login [username] [password] - Login with plaintext username and password of server\n\n"
-    "> pwd - Print working directory\n\n"
-    "> cd - Change workig directory\n\n"
-    "> ls - Print directory contents\n\n"
-    "> quit - Terminate connection and exit\n\n"
-    "> ";
+    " login username [password] - Login with plaintext username and password of server.\n\n"
+    " pwd - Print working directory.\n\n"
+    " cd - Change workig directory.\n\n"
+    " ls - Print directory contents.\n\n"
+    " quit - Terminate connection and exit.\n\n"
+    " help - bring up this menu.\n\n"
+    " put source [dst_name] - upload source file to server, optnionally changing the name.\n\n"
+    " get source [local_name] - download file from server, optnionally changing the name.\n\n"
+    " type representation_type - ASCII or BINARY representation type selection for transfers.\n";
     return help_cmds;
 }
 

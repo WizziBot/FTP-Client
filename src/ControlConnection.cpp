@@ -121,7 +121,6 @@ string ControlConnection::processResponseCode(){
         return readDataUntilCode(s_code);
     } else {
         int r_code = stoi(s_code);
-        cout << "CODE: " << r_code << endl;
         switch (r_code) {
         case S_GOODBYE:
             conn_status = CONN_TERM;
@@ -158,6 +157,7 @@ string ControlConnection::processUserCommand(string command){
         if (cmd_split.size() == 2){
             return cwd(cmd_split.at(1));
         }
+        return string("Insufficient arguments");
     } else if (cmd_split.at(0) == "ls"){
         return list();
     } else if (cmd_split.at(0) == "quit"){
@@ -168,24 +168,33 @@ string ControlConnection::processUserCommand(string command){
         if (cmd_split.size() == 2){
             return type(cmd_split.at(1));
         }
+        return string("Insufficient arguments");
     } else if (cmd_split.at(0) == "mode"){
         if (cmd_split.size() == 2){
             return mode(cmd_split.at(1));
         }
+        return string("Insufficient arguments");
     } else if (cmd_split.at(0) == "get"){
         if (cmd_split.size() == 3){
             return retr(cmd_split.at(1),cmd_split.at(2));
+        } else if (cmd_split.size() == 2){
+            return retr(cmd_split.at(1),cmd_split.at(1));
         }
+        return string("Insufficient arguments");
     } else if (cmd_split.at(0) == "put"){
         if (cmd_split.size() == 3){
             return stor(cmd_split.at(1),cmd_split.at(2));
+        } else if (cmd_split.size() == 2){
+            return stor(cmd_split.at(1),cmd_split.at(1));
         }
+        return string("Insufficient arguments");
     } else if (cmd_split.at(0) == "system"){
         return syst();
-    } else if (cmd_split.at(0) == "delete"){
+    } else if (cmd_split.at(0) == "rm"){
         if (cmd_split.size() == 2){
             return dele(cmd_split.at(1));
         }
+        return string("Insufficient arguments");
     } else if (cmd_split.at(0) == "login") {
         if (cmd_split.size() == 3) {
             return ftp_login(cmd_split.at(1),cmd_split.at(2));
