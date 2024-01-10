@@ -96,16 +96,6 @@ int DataConnection::dsend(const string &buffer){
     return send(client_socket,buffer.c_str(),buffer.length(),0);
 }
 
-vector<char> DataConnection::drecv(int size){
-    if (conn_status != CONN_SUCCESS) return vector<char>();
-    vector<char> recv_buf(size);
-    if (recv(client_socket,recv_buf.data(),recv_buf.capacity(),0) == -1){
-        cerr << "Failed to read from data connection." << endl;
-        recv_buf.shrink_to_fit(); //Attempt to deallocate the memory reserved for the failed operation
-    }
-    return recv_buf;
-}
-
 vector<char> DataConnection::drecv_eof(){
     if (conn_status != CONN_SUCCESS) return vector<char>();
     vector<char> recv_buf(1024);

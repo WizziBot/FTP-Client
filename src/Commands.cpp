@@ -279,24 +279,9 @@ string ControlConnection::retr(string f_name,string f_dst){
         return response;
     }
 
-    // Get size of payload
-    char size_str[32] = {0};
-    int parameter_index = response.find('(') + 1;
-    char c = 0;
-    for (int i=0; i < (int)sizeof(size_str) && parameter_index < (int)response.size(); i++,parameter_index++){
-        c = response.at(parameter_index);
-        if (c == ')') break;
-        size_str[i] = c;
-    }
-    int size_bytes = atoi(size_str);
-    if (size_bytes <= 0){ // Check that a valid size is parsed
-        delete data_connection;
-        return response;
-    }
-
     // Receive payload through data connection
 
-    vector<char> data_to_write = data_connection->drecv(size_bytes);
+    vector<char> data_to_write = data_connection->drecv_eof();
     delete data_connection;
     
     cout << "Writing " << data_to_write.size() << " bytes to " << f_dst << endl;
