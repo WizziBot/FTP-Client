@@ -96,9 +96,9 @@ string ControlConnection::readDataUntilCode(char* stop_code){
                     msg_recv_buffer[line_end+1] = '\0';
                     break;
                 }
-                isLineEnd = 0;
                 line_start = line_end + 1;
-            } else isLineEnd = 0;
+            }
+            isLineEnd = 0;
             // Detect line end
             if (msg_recv_buffer[line_end] == '\r') isLineEnd = 1;
             line_end++;
