@@ -25,8 +25,14 @@
 
 using namespace FTP;
 
-int main() {
-    ControlConnection Conn1("127.0.0.1");
+int main(int argc, char** argv) {
+    
+    if (argc != 2){
+        std::cerr << "Usage: " + std::string(argv[0]) + " server_ipv4_address" << std::endl;
+        return -1;
+    }
+
+    ControlConnection Conn1(argv[1]);
     if (Conn1.initConnection() == -1){
         perror("Unable to start connection");
         return -1;
