@@ -98,17 +98,15 @@ int DataConnection::dsend(const string &buffer){
 
 vector<char> DataConnection::drecv_eof(){
     if (conn_status != CONN_SUCCESS) return vector<char>();
-    vector<char> recv_buf(1024);
+    vector<char> recv_buf(1024); // Pre-allocate 1024 bytes
     char temp;
     while (1) {
         int n_bytes = recv(client_socket,&temp,sizeof(char),0);
-        switch (n_bytes)
-        {
+        switch (n_bytes) {
         case -1:
             cerr << "Failed to read from data connection." << endl;
-            recv_buf.shrink_to_fit();
+            recv_buf.shrink_to_fit(); // Free unused memory
             return recv_buf;
-            break;
         case 0:
             // EOF implied by closing of data connection.
             /* (RFC 959) 3.4.  TRANSMISSION MODES
@@ -119,8 +117,8 @@ vector<char> DataConnection::drecv_eof(){
                 For files transmitted in page structure a "last-page" page type is
                 used.
             */
+            recv_buf.shrink_to_fit();
             return recv_buf;
-            break;
         default:
             recv_buf.push_back(temp);
         }
