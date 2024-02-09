@@ -11,5 +11,5 @@ _deps
 .vscode/**
 bin/**
 obj/**
-*.txt
 *.jpeg
+build/**/*
