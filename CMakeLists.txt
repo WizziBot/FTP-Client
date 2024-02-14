@@ -14,5 +14,6 @@ set(FTP_HEADERS_DIR ${PROJECT_SOURCE_DIR}/src)
 include_directories(${FTP_HEADERS_DIR})
 
 add_subdirectory(src)
+add_subdirectory(Qt-GUI)
 
 
