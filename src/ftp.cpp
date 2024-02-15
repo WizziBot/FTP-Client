@@ -38,7 +38,20 @@ int main(int argc, char** argv) {
         return -1;
     }
 
-    Conn1.interactive();
+    while (Conn1.getConStatus() == CONN_SUCCESS){
+        string command;
+        cout << ">";
+        getline(cin, command);
+        vector<string> cmd_split;
+        string temp;
+        stringstream cmd_stream(command);
+
+        while(getline(cmd_stream,temp,' ')){
+            cmd_split.push_back(temp);
+        }
+        string response = Conn1.processUserCommand(cmd_split);
+        if (response != "") cout << response << endl;
+    }
 
     return 0;
 }

@@ -59,10 +59,12 @@ ControlConnection(const char* dst_ip);
 */
 int initConnection();
 
-/*  Starts an interactive session in the terminal where the user can issue commands
-    to the server manually and receive its responses.
+/*
+    Process the user command by separating it into stem and arguments
+    @param command_args command arguments including command keyword
+    @returns the response from the server
 */
-void interactive();
+string processUserCommand(vector<string> command_args);
 
 eConnStatus getConStatus(){return conn_status;}
 
@@ -141,12 +143,6 @@ string readDataUntilCode(char* stop_code);
     Process the response code in the msg_recv_buffer
 */
 string processResponseCode();
-
-/*
-    Process the user command by separating it into stem and arguments
-    @returns the response from the server to be printer/processed otherwise
-*/
-string processUserCommand(string command);
 
 /*  Parse a Telnet string which is terminated by \r\n
     @returns null terminated response string;

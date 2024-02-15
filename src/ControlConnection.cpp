@@ -139,82 +139,66 @@ string ControlConnection::processResponseCode(){
     return "";
 }
 
-string ControlConnection::processUserCommand(string command){
+string ControlConnection::processUserCommand(vector<string> command_args){
     // TODO
     // Parse arguments from spaces
-    vector<string> cmd_split;
-    string temp;
-    stringstream cmd_stream(command);
-
-    while(getline(cmd_stream,temp,' ')){
-        cmd_split.push_back(temp);
-    }
+    
 
     // Switch case from base command, pass parameters if correct count
-    if (cmd_split.at(0) == "pwd"){
+    if (command_args.at(0) == "pwd"){
         return pwd();
-    } else if (cmd_split.at(0) == "cd"){
-        if (cmd_split.size() == 2){
-            return cwd(cmd_split.at(1));
+    } else if (command_args.at(0) == "cd"){
+        if (command_args.size() == 2){
+            return cwd(command_args.at(1));
         }
         return string("Insufficient arguments");
-    } else if (cmd_split.at(0) == "ls"){
+    } else if (command_args.at(0) == "ls"){
         return list();
-    } else if (cmd_split.at(0) == "quit"){
+    } else if (command_args.at(0) == "quit"){
         return quit();
-    } else if (cmd_split.at(0) == "help"){
+    } else if (command_args.at(0) == "help"){
         return help();
-    } else if (cmd_split.at(0) == "type"){
-        if (cmd_split.size() == 2){
-            return type(cmd_split.at(1));
+    } else if (command_args.at(0) == "type"){
+        if (command_args.size() == 2){
+            return type(command_args.at(1));
         }
         return string("Insufficient arguments");
-    } else if (cmd_split.at(0) == "mode"){
-        if (cmd_split.size() == 2){
-            return mode(cmd_split.at(1));
+    } else if (command_args.at(0) == "mode"){
+        if (command_args.size() == 2){
+            return mode(command_args.at(1));
         }
         return string("Insufficient arguments");
-    } else if (cmd_split.at(0) == "get"){
-        if (cmd_split.size() == 3){
-            return retr(cmd_split.at(1),cmd_split.at(2));
-        } else if (cmd_split.size() == 2){
-            return retr(cmd_split.at(1),cmd_split.at(1));
+    } else if (command_args.at(0) == "get"){
+        if (command_args.size() == 3){
+            return retr(command_args.at(1),command_args.at(2));
+        } else if (command_args.size() == 2){
+            return retr(command_args.at(1),command_args.at(1));
         }
         return string("Insufficient arguments");
-    } else if (cmd_split.at(0) == "put"){
-        if (cmd_split.size() == 3){
-            return stor(cmd_split.at(1),cmd_split.at(2));
-        } else if (cmd_split.size() == 2){
-            return stor(cmd_split.at(1),cmd_split.at(1));
+    } else if (command_args.at(0) == "put"){
+        if (command_args.size() == 3){
+            return stor(command_args.at(1),command_args.at(2));
+        } else if (command_args.size() == 2){
+            return stor(command_args.at(1),command_args.at(1));
         }
         return string("Insufficient arguments");
-    } else if (cmd_split.at(0) == "system"){
+    } else if (command_args.at(0) == "system"){
         return syst();
-    } else if (cmd_split.at(0) == "rm"){
-        if (cmd_split.size() == 2){
-            return dele(cmd_split.at(1));
+    } else if (command_args.at(0) == "rm"){
+        if (command_args.size() == 2){
+            return dele(command_args.at(1));
         }
         return string("Insufficient arguments");
-    } else if (cmd_split.at(0) == "login") {
-        if (cmd_split.size() == 3) {
-            return ftp_login(cmd_split.at(1),cmd_split.at(2));
-        } else if (cmd_split.size() == 2){
-            return ftp_login(cmd_split.at(1),string());
+    } else if (command_args.at(0) == "login") {
+        if (command_args.size() == 3) {
+            return ftp_login(command_args.at(1),command_args.at(2));
+        } else if (command_args.size() == 2){
+            return ftp_login(command_args.at(1),string());
         }
         return string("Insufficient arguments");
     }
     return string("Unknown Command");
 
-}
-
-void ControlConnection::interactive(){
-    while (conn_status == CONN_SUCCESS){
-        string command;
-        cout << ">";
-        getline(cin, command);
-        string response = processUserCommand(command);
-        if (response != "") cout << response << endl;
-    }
 }
 
 int ControlConnection::initConnection(){
