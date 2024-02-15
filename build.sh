@@ -2,6 +2,5 @@
 
 cd ./build
 cmake ../
-make
+make install
 cd ..
-cp ./build/Qt-GUI/Qt-GUI ./bin/
