@@ -30,15 +30,14 @@ DataConnection::DataConnection(string dst_address){
     }
     // Parse address
     // First 4 bytes are address and last 2 are port information
-    // in the format (h1,h2,h3,h4,p1,p2) where h1-h4, p1-p2 are string representations of bytes
-    uint32_t dst_ip=0;
-    uint16_t dst_port=0;
-    // Points to 8-bit segments of the dst_ip 32-bit ip addr or 16-bit port
-    uint8_t *dstptr = (uint8_t*)(&dst_ip);
+    // in the format (h1,h2,h3,h4,p1,p2) where h1-h4, p1-p2 are numeric string representations of bytes from highest to lowest order.
+    uint16_t dst_port = 0;
+    uint32_t dst_ip = 0;
 
     int is_reading = 0;
     // Keep track of how many bytes have been read
     int byte_number = 0;
+    uint8_t next_byte = 0;
     // Maximum byte size is '255' which is 3 chars long, last byte is for null termination
     char curr_byte_str[] = {0,0,0,0};
     char *cbptr = curr_byte_str;
@@ -51,11 +50,14 @@ DataConnection::DataConnection(string dst_address){
                 is_reading = 0;
                 // Allow case fall through to process last byte
             case ',':
-                *dstptr = (uint8_t)atoi(curr_byte_str); // Assign currently stored string as a number to the location of dstptr
+                next_byte = (uint8_t)atoi(curr_byte_str); // Assign currently stored string as a number to the location of dstptr
                 memset(curr_byte_str,0,sizeof(curr_byte_str)); // Clear char array
                 cbptr = curr_byte_str; // update cbptr to the start of the char array
-                if (byte_number == 3) dstptr = (uint8_t*)&dst_port; // if were on the 3rd index byte then finished getting ip
-                else dstptr++;
+                if (byte_number < 4) { // byte numbers 0,1,2,3 are part of the IP whereas 4 and 5 are the port.
+                    dst_ip |= next_byte << (3-byte_number)*8; //Left shift next byte into place
+                } else {
+                    dst_port |= next_byte << (5-byte_number)*8;
+                }
                 byte_number++;
                 break;
             default:
@@ -66,11 +68,11 @@ DataConnection::DataConnection(string dst_address){
         }
 
         if (c == '(' && is_reading == 0) is_reading = 1;
-    }   
+    }
 
     server_addr.sin_family = AF_INET;
-    server_addr.sin_port = dst_port;
-    server_addr.sin_addr.s_addr = dst_ip;
+    server_addr.sin_port = htons(dst_port);
+    server_addr.sin_addr.s_addr = htonl(dst_ip);
 
     if(connect(client_socket,(struct sockaddr*)&server_addr, sizeof(server_addr)) == -1){
         conn_status = CONN_TERM;
