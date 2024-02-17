@@ -54,10 +54,6 @@ string ControlConnection::fromTelnet(char* buff,int buff_len){
     return string(s_msg);
 }
 
-string ControlConnection::toTelnet(string command){
-    return command.append("\r\n");
-}
-
 // Reads from the start of long response till the end of it by reading the stop_code twice
 // (RFC 959) 4.2. FTP REPLIES
 /*
@@ -154,6 +150,8 @@ string ControlConnection::processUserCommand(vector<string> command_args){
         return string("Insufficient arguments");
     } else if (command_args.at(0) == "ls"){
         return list();
+    } else if (command_args.at(0) == "status"){
+        return stat();
     } else if (command_args.at(0) == "quit"){
         return quit();
     } else if (command_args.at(0) == "help"){

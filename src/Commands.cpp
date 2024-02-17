@@ -34,7 +34,9 @@ string ControlConnection::getResponse() {
         cerr << "Error in receiving response to command" << endl;
         return string("");
     } else {
-        return processResponseCode();
+        string response = processResponseCode();
+        setLastResponse(response);
+        return response;
     }
 }
 
@@ -57,8 +59,7 @@ string ControlConnection::ftp_login(const string username,const string password)
     cmd_string += password;
     cmd_string += "\r\n";
     send(client_socket,cmd_string.c_str(),cmd_string.length(),0);
-    string response2 = getResponse();
-    return response2;
+    return getResponse();
 }
 
 // Print working directory
@@ -92,6 +93,7 @@ string ControlConnection::help(){
     " pwd - Print working directory.\n\n"
     " cd - Change workig directory.\n\n"
     " ls - Print directory contents.\n\n"
+    " status - Print connection information.\n\n"
     " quit - Terminate connection and exit.\n\n"
     " help - bring up this menu.\n\n"
     " put source [dst_name] - upload source file to server, optnionally changing the name.\n\n"
@@ -126,6 +128,12 @@ string ControlConnection::mode(const string t_mode){
 
 string ControlConnection::syst(){
     char cmd_string[] = "SYST\r\n";
+    send(client_socket,cmd_string,sizeof(cmd_string)-1,0);
+    return getResponse();
+}
+
+string ControlConnection::stat(){
+    char cmd_string[] = "STAT\r\n";
     send(client_socket,cmd_string,sizeof(cmd_string)-1,0);
     return getResponse();
 }
@@ -171,10 +179,9 @@ string ControlConnection::list(){
     delete data_connection;
 
     string stdout_data(data_to_write.begin(),data_to_write.end());
-    
-    cout << stdout_data << endl;
+    getResponse();
 
-    return getResponse();
+    return stdout_data;
 
 }
 
@@ -239,8 +246,6 @@ string ControlConnection::stor(const string f_name,const string f_dst){
         while (getline(file,line)){
             buffer += line;
         }
-
-        cout << "Buffer: " << buffer << endl;
 
         data_connection->dsend(buffer);
         delete data_connection;

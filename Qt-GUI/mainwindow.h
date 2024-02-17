@@ -20,6 +20,8 @@ public:
 private slots:
     void on_pushButton_clicked();
 
+    void sendCommand(bool clicked);
+
 private:
     void pushText(std::string output);
     Ui::MainWindow *ui;

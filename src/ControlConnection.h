@@ -66,7 +66,15 @@ int initConnection();
 */
 string processUserCommand(vector<string> command_args);
 
+/*
+    Returns the status of the client-server connection
+*/
 eConnStatus getConStatus(){return conn_status;}
+
+/*
+    Gets the last response message received from the server
+*/
+string getLastResponse(){return lastResponse;}
 
 private:
 
@@ -79,7 +87,8 @@ string ftp_login(string username,string password);
 */
 string pwd();
 /*
-    Lists directory contents
+    Lists directory contents (Note: server response is not returned and may be accessed by getLastResponse())
+    @returns A string with the directory listing.
 */
 string list();
 /*
@@ -119,6 +128,10 @@ string stor(const string f_name,const string f_dst);
 */
 string syst();
 /*
+    Requests connection information via control connection
+*/
+string stat();
+/*
     Deletes file on remote server
     @param f_name name of remote file
 */
@@ -149,11 +162,9 @@ string processResponseCode();
 */
 string fromTelnet(char* buff,int buff_len);
 
-/*  Put a string into telnet format ready to be sent.
-    @param command null terminated command
-    @returns a \r\n terminated control command string
-*/
-string toTelnet(string command);
+void setLastResponse(string newResponse){
+    lastResponse = newResponse;
+}
 
 eDataMode data_mode = DATA_PASSIVE;
 eDataType data_type = DATA_ASCII;
@@ -161,6 +172,7 @@ eConnStatus conn_status = CONN_NOT_INIT;
 int client_socket;
 struct sockaddr_in server_addr;
 char msg_recv_buffer[1024];
+string lastResponse;
 
 DataConnection* data_connection = NULL;
 };
