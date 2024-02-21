@@ -94,6 +94,7 @@ string ControlConnection::help(){
     " cd - Change workig directory.\n\n"
     " ls - Print directory contents.\n\n"
     " status - Print connection information.\n\n"
+    " system - Prints ftp server system information.\n\n"
     " quit - Terminate connection and exit.\n\n"
     " help - bring up this menu.\n\n"
     " put source [dst_name] - upload source file to server, optnionally changing the name.\n\n"
