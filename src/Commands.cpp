@@ -93,6 +93,7 @@ string ControlConnection::help(){
     " pwd - Print working directory.\n\n"
     " cd - Change workig directory.\n\n"
     " ls - Print directory contents.\n\n"
+    " rm file_name - Delete file on remote server.\n\n"
     " status - Print connection information.\n\n"
     " system - Prints ftp server system information.\n\n"
     " quit - Terminate connection and exit.\n\n"
