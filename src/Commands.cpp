@@ -48,10 +48,6 @@ string ControlConnection::ftp_login(const string username,const string password)
     
     string response = getResponse();
 
-    if (response.size() != 0 && response.at(0) == D1_COMPLETION){
-        return response;
-    }
-
     if (response.size() == 0 || response.at(0) != D1_INTERMEDIATE){
         return response;
     }
