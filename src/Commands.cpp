@@ -106,20 +106,23 @@ string ControlConnection::help(){
 
 string ControlConnection::type(string t_type){
     string cmd_string = "TYPE ";
+    eDataType newType;
     // Convert input to lowercase by performing std::tolower() on every character in t_type using std::transform()
     transform(t_type.begin(), t_type.end(), t_type.begin(), [](unsigned char c){ return tolower(c); });
     // Only accept ascii and binary types
     if (t_type == "ascii"){
         cmd_string += "A\r\n";
+        newType = DATA_ASCII;
     } else if (t_type == "binary"){
         cmd_string += "I\r\n";
+        newType = DATA_BINARY;
     } else {
         return string("Invalid or Unsuported Type");
     }
     send(client_socket,cmd_string.c_str(),cmd_string.length(),0);
     string response = getResponse();
     if (response.at(0) == D1_COMPLETION){
-        data_type = DATA_BINARY;
+        data_type = newType;
     }
     return response;
 }
