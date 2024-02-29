@@ -104,7 +104,6 @@ string ControlConnection::readDataUntilCode(char* stop_code){
     return string(msg_recv_buffer);
 }
 
-// TODO: Implement function map
 string ControlConnection::processResponseCode(){
     char* s_code = msg_recv_buffer;
     // Return if s_code does not contain a response code
