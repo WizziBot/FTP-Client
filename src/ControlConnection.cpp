@@ -135,9 +135,6 @@ string ControlConnection::processResponseCode(){
 }
 
 string ControlConnection::processUserCommand(vector<string> command_args){
-    // TODO
-    // Parse arguments from spaces
-    
 
     // Switch case from base command, pass parameters if correct count
     if (command_args.at(0) == "pwd"){
