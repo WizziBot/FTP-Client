@@ -100,7 +100,8 @@ int DataConnection::dsend(const string &buffer){
 
 vector<char> DataConnection::drecv_eof(){
     if (conn_status != CONN_SUCCESS) return vector<char>();
-    vector<char> recv_buf(1024); // Pre-allocate 1024 bytes
+    vector<char> recv_buf; // Pre-allocate 1024 bytes
+    recv_buf.reserve(1024);
     char temp;
     while (1) {
         int n_bytes = recv(client_socket,&temp,sizeof(char),0);
