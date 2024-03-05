@@ -47,6 +47,7 @@ string ControlConnection::ftp_login(const string username,const string password)
     send(client_socket,cmd_string.c_str(),cmd_string.length(),0);
     
     string response = getResponse();
+    log(response);
 
     if (response.size() == 0 || response.at(0) != D1_INTERMEDIATE){
         return response;

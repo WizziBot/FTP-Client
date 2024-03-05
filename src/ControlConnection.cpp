@@ -207,7 +207,7 @@ int ControlConnection::initConnection(){
     }
     // Check status code
     string r_message = fromTelnet(msg_recv_buffer,sizeof(msg_recv_buffer));
-    cout << r_message << endl;
+    log(r_message);
     if (r_message.at(0) != '2'){
         perror("Error in receiving server hello");
         conn_status = CONN_FAILED;

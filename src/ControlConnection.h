@@ -16,17 +16,6 @@
 
 #pragma once
 
-#define S_READY 220
-#define S_STATUS_INDICATOR 211
-#define S_GOODBYE 221
-#define S_PASSIVE_MODE 227
-
-#define D1_PRELIMINARY '1'
-#define D1_COMPLETION '2'
-#define D1_INTERMEDIATE '3'
-#define D1_TRANSIENT_NEGATIVE '4'
-#define D1_FAILURE '5'
-
 #include <iostream>
 #include <string.h>
 #include <stdio.h>
@@ -139,6 +128,10 @@ string dele(const string f_name);
 */
 string cwd(const string new_dir);
 
+void setLogger(void(*logger_ptr)(string)){
+    log = logger_ptr;
+}
+
 private:
 
 /*
@@ -165,6 +158,13 @@ string fromTelnet(char* buff,int buff_len);
 void setLastResponse(string newResponse){
     lastResponse = newResponse;
 }
+
+// Logging may be redirected.
+
+static void defaultLog(string text) {
+    cout << text << endl;
+}
+void (*log)(string) = defaultLog;
 
 eDataMode data_mode = DATA_PASSIVE;
 eDataType data_type = DATA_ASCII;
