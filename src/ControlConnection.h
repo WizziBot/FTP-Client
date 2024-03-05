@@ -76,8 +76,6 @@ eConnStatus getConStatus(){return conn_status;}
 */
 string getLastResponse(){return lastResponse;}
 
-private:
-
 /*
     Send USER and PASS commands to login.
 */
@@ -140,6 +138,8 @@ string dele(const string f_name);
     Change working directory
 */
 string cwd(const string new_dir);
+
+private:
 
 /*
     Receive server response and return it to the caller as a string
