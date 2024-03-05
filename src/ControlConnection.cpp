@@ -23,7 +23,7 @@ namespace FTP {
 
 using namespace std;
 
-ControlConnection::ControlConnection(const char* dst_ip){
+ControlConnection::ControlConnection(string dst_ip){
     client_socket = socket(AF_INET, SOCK_STREAM, 0);
     if (client_socket == -1) {
         perror("Error creating socket");
@@ -31,7 +31,7 @@ ControlConnection::ControlConnection(const char* dst_ip){
     }
     server_addr.sin_family = AF_INET;
     server_addr.sin_port = htons(CONTROL_PORT);
-    server_addr.sin_addr.s_addr = inet_addr(dst_ip);
+    server_addr.sin_addr.s_addr = inet_addr(dst_ip.c_str());
 }
 
 ControlConnection::~ControlConnection(){

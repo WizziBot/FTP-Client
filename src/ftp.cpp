@@ -31,8 +31,8 @@ int main(int argc, char** argv) {
         std::cerr << "Usage: " + std::string(argv[0]) + " server_ipv4_address" << std::endl;
         return -1;
     }
-
-    ControlConnection Conn1(argv[1]);
+    string address = string(argv[1]);
+    ControlConnection Conn1(address);
     if (Conn1.initConnection() == -1){
         perror("Unable to start connection");
         return -1;

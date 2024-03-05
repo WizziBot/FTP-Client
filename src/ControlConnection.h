@@ -51,7 +51,7 @@ public:
 /*  Defines an FTP control connection
     @param dst_ip the server's IPv4 address
 */
-ControlConnection(const char* dst_ip);
+ControlConnection(string dst_ip);
 ~ControlConnection();
 
 /*  Attempts to connect to the FTP server
