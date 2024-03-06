@@ -17,6 +17,7 @@ set(PROJECT_SOURCES
         mainwindow.cpp
         mainwindow.ui
         terminaloutput.h
+        ftpparse.cpp
 )
 
 if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
