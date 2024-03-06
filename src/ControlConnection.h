@@ -40,7 +40,7 @@ public:
 /*  Defines an FTP control connection
     @param dst_ip the server's IPv4 address
 */
-ControlConnection(string dst_ip);
+ControlConnection(const string dst_ip,const int dst_port = CONTROL_PORT);
 ~ControlConnection();
 
 /*  Attempts to connect to the FTP server

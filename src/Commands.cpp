@@ -43,6 +43,7 @@ string ControlConnection::getResponse() {
 string ControlConnection::ftp_login(const string username,const string password){
     string cmd_string = "USER ";
     cmd_string += username;
+    log(cmd_string);
     cmd_string += "\r\n";
     send(client_socket,cmd_string.c_str(),cmd_string.length(),0);
     
@@ -54,6 +55,7 @@ string ControlConnection::ftp_login(const string username,const string password)
     }
     cmd_string = "PASS ";
     cmd_string += password;
+    log(cmd_string);
     cmd_string += "\r\n";
     send(client_socket,cmd_string.c_str(),cmd_string.length(),0);
     return getResponse();
@@ -62,6 +64,7 @@ string ControlConnection::ftp_login(const string username,const string password)
 // Print working directory
 string ControlConnection::pwd(){
     char cmd_string[] = "PWD\r\n";
+    log(string("PWD"));
     send(client_socket,cmd_string,sizeof(cmd_string)-1,0);
     return getResponse();
 }
@@ -70,6 +73,7 @@ string ControlConnection::pwd(){
 string ControlConnection::cwd(const string new_dir){
     string cmd_string = "CWD ";
     cmd_string += new_dir;
+    log(cmd_string);
     cmd_string += "\r\n";
     send(client_socket,cmd_string.c_str(),cmd_string.length(),0);
     return getResponse();
@@ -80,6 +84,7 @@ string ControlConnection::cwd(const string new_dir){
 */
 string ControlConnection::quit(){
     char cmd_string[] = "QUIT\r\n";
+    log(string("QUIT"));
     send(client_socket,cmd_string,sizeof(cmd_string)-1,0);
     return getResponse();
 }
@@ -116,6 +121,7 @@ string ControlConnection::type(string t_type){
     } else {
         return string("Invalid or Unsuported Type");
     }
+    log(cmd_string);
     send(client_socket,cmd_string.c_str(),cmd_string.length(),0);
     string response = getResponse();
     if (response.at(0) == D1_COMPLETION){
@@ -130,12 +136,14 @@ string ControlConnection::mode(const string t_mode){
 
 string ControlConnection::syst(){
     char cmd_string[] = "SYST\r\n";
+    log(string("SYST"));
     send(client_socket,cmd_string,sizeof(cmd_string)-1,0);
     return getResponse();
 }
 
 string ControlConnection::stat(){
     char cmd_string[] = "STAT\r\n";
+    log(string("STAT"));
     send(client_socket,cmd_string,sizeof(cmd_string)-1,0);
     return getResponse();
 }
@@ -143,6 +151,7 @@ string ControlConnection::stat(){
 string ControlConnection::dele(string f_name){
     string cmd_string = "DELE ";
     cmd_string += f_name;
+    log(cmd_string);
     cmd_string += "\r\n";
     send(client_socket,cmd_string.c_str(),cmd_string.length(),0);
     return getResponse();
@@ -157,11 +166,13 @@ string ControlConnection::list(){
     if (data_mode != DATA_PASSIVE) return string("");
 
     string cmd_string = "PASV\r\n";
+    log(string("PASV"));
     send(client_socket,cmd_string.c_str(),cmd_string.length(),0);
     string response = getResponse();
     if (response.size() == 0 || response.at(0) != D1_COMPLETION){
         return response;
     }
+    log(response);
 
     data_connection = new DataConnection(response);
     if (data_connection->getStatus() != CONN_SUCCESS) {
@@ -169,6 +180,7 @@ string ControlConnection::list(){
     }
 
     cmd_string = "LIST\r\n";
+    log(string("LIST"));
     send(client_socket,cmd_string.c_str(),cmd_string.length(),0);
     response = getResponse();
 
@@ -176,12 +188,13 @@ string ControlConnection::list(){
         delete data_connection;
         return response;
     }
+    log(response);
     
     vector<char> data_to_write = data_connection->drecv_eof();
     delete data_connection;
 
     string stdout_data(data_to_write.begin(),data_to_write.end());
-    getResponse();
+    log(getResponse());
 
     return stdout_data;
 
@@ -193,11 +206,13 @@ string ControlConnection::stor(const string f_name,const string f_dst){
 
     // Activate passive mode on server
     string cmd_string = "PASV\r\n";
+    log(string("PASV"));
     send(client_socket,cmd_string.c_str(),cmd_string.length(),0);
     string response = getResponse();
     if (response.size() == 0 || response.at(0) != D1_COMPLETION){
         return response;
     }
+    log(response);
     // Initiate data connection
     data_connection = new DataConnection(response);
     if (data_connection->getStatus() != CONN_SUCCESS) {
@@ -206,6 +221,7 @@ string ControlConnection::stor(const string f_name,const string f_dst){
     // Send store request
     cmd_string = "STOR ";
     cmd_string += f_dst;
+    log(cmd_string);
     cmd_string += "\r\n";
     send(client_socket,cmd_string.c_str(),cmd_string.length(),0);
     response = getResponse();
@@ -214,6 +230,7 @@ string ControlConnection::stor(const string f_name,const string f_dst){
     if (response.size() == 0 || response.at(0) != D1_PRELIMINARY){
         return response;
     }
+    log(response);
 
     // Get file contents and send data to server
 
@@ -262,6 +279,7 @@ string ControlConnection::retr(string f_name,string f_dst){
 
     // Activate passive mode on server
     string cmd_string = "PASV\r\n";
+    log(string("PASV"));
     send(client_socket,cmd_string.c_str(),cmd_string.length(),0);
     string response = getResponse();
     if (response.size() == 0 || response.at(0) != D1_COMPLETION){
@@ -276,6 +294,7 @@ string ControlConnection::retr(string f_name,string f_dst){
     // Send store request
     cmd_string = "RETR ";
     cmd_string += f_name;
+    log(cmd_string);
     cmd_string += "\r\n";
     send(client_socket,cmd_string.c_str(),cmd_string.length(),0);
     response = getResponse();
@@ -285,13 +304,14 @@ string ControlConnection::retr(string f_name,string f_dst){
         delete data_connection;
         return response;
     }
+    log(response);
 
     // Receive payload through data connection
 
     vector<char> data_to_write = data_connection->drecv_eof();
     delete data_connection;
     
-    cout << "Writing " << data_to_write.size() << " bytes to " << f_dst << endl;
+    log("Writing " + to_string(data_to_write.size()) + " bytes to " + f_dst);
 
     if (data_type == DATA_BINARY){
         // Setup file io stream in binary mode then write to it and finally close
