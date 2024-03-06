@@ -53,6 +53,12 @@ int main(int argc, char** argv) {
         stringstream cmd_stream(command);
 
         while(getline(cmd_stream,temp,' ')){
+            if (temp.at(0) == '\"') {
+                string rest;
+                getline(cmd_stream,rest);
+                temp = temp + " " + rest;
+                temp = temp.substr(1,temp.length()-2);
+            }
             cmd_split.push_back(temp);
         }
         string response = Conn1->processUserCommand(cmd_split);
