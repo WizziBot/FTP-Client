@@ -12,6 +12,7 @@ MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
     , ui(new Ui::MainWindow)
 {
+    this->setFixedSize(QSize(1097, 773));
     w_ref = this;
     ui->setupUi(this);
     QObject::connect(ui->connect_btn,&QPushButton::clicked,this,&MainWindow::connect);
@@ -54,11 +55,3 @@ void MainWindow::connect()
         delete Conn;
     }
 }
-
-// void MainWindow::sendCommand(bool clicked){
-//     using namespace std;
-
-//     string command = ui->commandInput->toPlainText().toStdString();
-//     std::cout << command << std::endl;
-
-// }
