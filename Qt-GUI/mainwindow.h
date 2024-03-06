@@ -1,7 +1,9 @@
-#ifndef MAINWINDOW_H
-#define MAINWINDOW_H
+
+#pragma once
 
 #include <QMainWindow>
+#include <StatusConstants.h>
+#include <ControlConnection.h>
 
 QT_BEGIN_NAMESPACE
 namespace Ui {
@@ -17,14 +19,13 @@ public:
     MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
 
-private slots:
-    void on_pushButton_clicked();
+    void pushText(std::string output);
 
-    void sendCommand(bool clicked);
+private slots:
+    void connect();
 
 private:
-    void pushText(std::string output);
     Ui::MainWindow *ui;
-    int countPressed = 0;
+    FTP::ControlConnection* Conn;
 };
-#endif // MAINWINDOW_H
+

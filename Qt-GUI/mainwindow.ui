@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>696</width>
-    <height>530</height>
+    <width>1097</width>
+    <height>773</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -17,11 +17,11 @@
    <string notr="true">background-color: rgb(32,36,36);</string>
   </property>
   <widget class="QWidget" name="centralwidget">
-   <widget class="QPushButton" name="pushButton">
+   <widget class="QPushButton" name="connect_btn">
     <property name="geometry">
      <rect>
-      <x>30</x>
-      <y>40</y>
+      <x>690</x>
+      <y>30</y>
       <width>112</width>
       <height>35</height>
      </rect>
@@ -38,11 +38,11 @@
      <string>Connect</string>
     </property>
    </widget>
-   <widget class="QLabel" name="label">
+   <widget class="QLabel" name="l_output">
     <property name="geometry">
      <rect>
-      <x>40</x>
-      <y>100</y>
+      <x>30</x>
+      <y>560</y>
       <width>87</width>
       <height>27</height>
      </rect>
@@ -60,34 +60,46 @@
      <string>Output</string>
     </property>
    </widget>
-   <widget class="QLabel" name="outputText">
+   <widget class="QProgressBar" name="p_file_status">
     <property name="geometry">
      <rect>
-      <x>40</x>
-      <y>150</y>
-      <width>461</width>
-      <height>251</height>
+      <x>750</x>
+      <y>550</y>
+      <width>301</width>
+      <height>28</height>
+     </rect>
+    </property>
+    <property name="value">
+     <number>24</number>
+    </property>
+   </widget>
+   <widget class="QLabel" name="l_file_name">
+    <property name="geometry">
+     <rect>
+      <x>750</x>
+      <y>510</y>
+      <width>111</width>
+      <height>27</height>
      </rect>
     </property>
     <property name="font">
      <font>
+      <pointsize>15</pointsize>
       <bold>false</bold>
      </font>
     </property>
     <property name="styleSheet">
-     <string notr="true">background-color: rgb(136, 138, 133);
-color: rgb(243, 243, 243);
-border-radius:15px;</string>
+     <string notr="true">color: rgb(255, 255, 255);</string>
     </property>
     <property name="text">
-     <string/>
+     <string>FileName</string>
     </property>
    </widget>
-   <widget class="QTextEdit" name="commandInput">
+   <widget class="QTextEdit" name="i_address">
     <property name="geometry">
      <rect>
-      <x>300</x>
-      <y>90</y>
+      <x>30</x>
+      <y>20</y>
       <width>191</width>
       <height>41</height>
      </rect>
@@ -100,12 +112,57 @@ border-radius:15px;</string>
     <property name="styleSheet">
      <string notr="true">color: rgb(243, 243, 243);</string>
     </property>
+    <property name="placeholderText">
+     <string>Server address</string>
+    </property>
    </widget>
-   <widget class="QPushButton" name="sendCommandBtn">
+   <widget class="QTextEdit" name="i_username">
     <property name="geometry">
      <rect>
-      <x>380</x>
-      <y>40</y>
+      <x>250</x>
+      <y>20</y>
+      <width>191</width>
+      <height>41</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <bold>false</bold>
+     </font>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">color: rgb(243, 243, 243);</string>
+    </property>
+    <property name="placeholderText">
+     <string>Username</string>
+    </property>
+   </widget>
+   <widget class="QTextEdit" name="i_password">
+    <property name="geometry">
+     <rect>
+      <x>470</x>
+      <y>20</y>
+      <width>191</width>
+      <height>41</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <bold>false</bold>
+     </font>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">color: rgb(243, 243, 243);</string>
+    </property>
+    <property name="placeholderText">
+     <string>Password</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="stor_btn">
+    <property name="geometry">
+     <rect>
+      <x>30</x>
+      <y>480</y>
       <width>112</width>
       <height>35</height>
      </rect>
@@ -119,7 +176,211 @@ border-radius:15px;</string>
      <string notr="true">color: rgb(255, 255, 255);</string>
     </property>
     <property name="text">
-     <string>Send</string>
+     <string>STOR</string>
+    </property>
+   </widget>
+   <widget class="QListWidget" name="f_host">
+    <property name="geometry">
+     <rect>
+      <x>30</x>
+      <y>130</y>
+      <width>301</width>
+      <height>331</height>
+     </rect>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">background-color: rgb(170, 170, 170);</string>
+    </property>
+    <item>
+     <property name="text">
+      <string>File1</string>
+     </property>
+    </item>
+    <item>
+     <property name="text">
+      <string>File2</string>
+     </property>
+    </item>
+    <item>
+     <property name="text">
+      <string>Directory1</string>
+     </property>
+    </item>
+   </widget>
+   <widget class="QListWidget" name="f_server">
+    <property name="geometry">
+     <rect>
+      <x>370</x>
+      <y>130</y>
+      <width>301</width>
+      <height>331</height>
+     </rect>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">background-color: rgb(170, 170, 170);</string>
+    </property>
+    <item>
+     <property name="text">
+      <string>File1</string>
+     </property>
+    </item>
+    <item>
+     <property name="text">
+      <string>File2</string>
+     </property>
+    </item>
+    <item>
+     <property name="text">
+      <string>Directory1</string>
+     </property>
+    </item>
+   </widget>
+   <widget class="QLabel" name="g_host">
+    <property name="geometry">
+     <rect>
+      <x>790</x>
+      <y>140</y>
+      <width>231</width>
+      <height>91</height>
+     </rect>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">background-color: rgb(114, 159, 207);</string>
+    </property>
+    <property name="text">
+     <string>Host</string>
+    </property>
+    <property name="alignment">
+     <set>Qt::AlignCenter</set>
+    </property>
+   </widget>
+   <widget class="QLabel" name="g_server">
+    <property name="geometry">
+     <rect>
+      <x>790</x>
+      <y>350</y>
+      <width>231</width>
+      <height>91</height>
+     </rect>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">background-color: rgb(233, 185, 110);</string>
+    </property>
+    <property name="text">
+     <string>Server</string>
+    </property>
+    <property name="alignment">
+     <set>Qt::AlignCenter</set>
+    </property>
+   </widget>
+   <widget class="QLabel" name="g_control_pipe">
+    <property name="geometry">
+     <rect>
+      <x>840</x>
+      <y>230</y>
+      <width>31</width>
+      <height>121</height>
+     </rect>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">background-color: rgb(138, 226, 52);</string>
+    </property>
+    <property name="text">
+     <string/>
+    </property>
+   </widget>
+   <widget class="QLabel" name="g_data_pipe">
+    <property name="geometry">
+     <rect>
+      <x>920</x>
+      <y>230</y>
+      <width>51</width>
+      <height>121</height>
+     </rect>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">background-color: rgb(136, 138, 133);</string>
+    </property>
+    <property name="text">
+     <string/>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="recv_btn">
+    <property name="geometry">
+     <rect>
+      <x>370</x>
+      <y>480</y>
+      <width>112</width>
+      <height>35</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <bold>false</bold>
+     </font>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">color: rgb(255, 255, 255);</string>
+    </property>
+    <property name="text">
+     <string>RECV</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="l_host_fs">
+    <property name="geometry">
+     <rect>
+      <x>30</x>
+      <y>90</y>
+      <width>111</width>
+      <height>27</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <pointsize>15</pointsize>
+      <bold>false</bold>
+     </font>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">color: rgb(255, 255, 255);</string>
+    </property>
+    <property name="text">
+     <string>Host</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="l_server_fs">
+    <property name="geometry">
+     <rect>
+      <x>370</x>
+      <y>90</y>
+      <width>111</width>
+      <height>27</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <pointsize>15</pointsize>
+      <bold>false</bold>
+     </font>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">color: rgb(255, 255, 255);</string>
+    </property>
+    <property name="text">
+     <string>Server</string>
+    </property>
+   </widget>
+   <widget class="TerminalOutput" name="o_control_text">
+    <property name="geometry">
+     <rect>
+      <x>30</x>
+      <y>600</y>
+      <width>1051</width>
+      <height>91</height>
+     </rect>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">background-color: rgb(170, 170, 170);</string>
     </property>
    </widget>
   </widget>
@@ -128,13 +389,20 @@ border-radius:15px;</string>
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>696</width>
+     <width>1097</width>
      <height>32</height>
     </rect>
    </property>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
  </widget>
+ <customwidgets>
+  <customwidget>
+   <class>TerminalOutput</class>
+   <extends>QPlainTextEdit</extends>
+   <header>terminaloutput.h</header>
+  </customwidget>
+ </customwidgets>
  <resources/>
  <connections/>
 </ui>

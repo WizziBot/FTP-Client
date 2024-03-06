@@ -1,17 +1,20 @@
 #include "mainwindow.h"
+#include "terminaloutput.h"
 #include "ui_mainwindow.h"
 #include <string>
-#include <ControlConnection.h>
 #include <QObject>
 #include <iostream>
 #include <string>
+
+MainWindow* w_ref;
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
     , ui(new Ui::MainWindow)
 {
+    w_ref = this;
     ui->setupUi(this);
-    QObject::connect(ui->sendCommandBtn,&QPushButton::clicked,this,&MainWindow::sendCommand);
+    QObject::connect(ui->connect_btn,&QPushButton::clicked,this,&MainWindow::connect);
 }
 
 MainWindow::~MainWindow()
@@ -20,23 +23,42 @@ MainWindow::~MainWindow()
 }
 
 void MainWindow::pushText(std::string output){
-
-    ui->outputText->setText(QString::fromStdString(output));
+    ui->o_control_text->setTerminalText("\n" + QString::fromStdString(output));
 }
 
-void MainWindow::on_pushButton_clicked()
+void logger(std::string text) {
+    w_ref->pushText(text);
+}
+
+void MainWindow::connect()
 {
+
     using namespace FTP;
-    ControlConnection Conn1("127.0.0.1");
-    if (Conn1.initConnection() == -1){
-        pushText(std::string("Unable to start connection"));
+    using namespace std;
+
+    string address = ui->i_address->toPlainText().toStdString();
+    string username = ui->i_username->toPlainText().toStdString();
+    string password = ui->i_password->toPlainText().toStdString();
+    
+    Conn = new ControlConnection(address);
+    Conn->setLogger(logger);
+    if (Conn->initConnection() == -1){
+        pushText(string("Unable to start connection"));
+        return;
+    }
+
+    string response = Conn->ftp_login(username,password);
+    pushText(response);
+
+    if (response.at(0) != D1_COMPLETION){
+        delete Conn;
     }
 }
 
-void MainWindow::sendCommand(bool clicked){
-    using namespace std;
+// void MainWindow::sendCommand(bool clicked){
+//     using namespace std;
 
-    string command = ui->commandInput->toPlainText().toStdString();
-    std::cout << command << std::endl;
+//     string command = ui->commandInput->toPlainText().toStdString();
+//     std::cout << command << std::endl;
 
-}
+// }
