@@ -5,6 +5,7 @@
 #include <string>
 #include <QObject>
 #include <QIcon>
+#include <QFileIconProvider>
 #include <iostream>
 #include <strstream>
 #include <string>
@@ -13,8 +14,8 @@
 namespace fs = std::experimental::filesystem;
 using namespace std;
 
-QIcon dir_icon = QIcon::fromTheme("folder");
-QIcon file_icon = QIcon::fromTheme("text-x-generic");
+QIcon dir_icon;
+QIcon file_icon;
 
 MainWindow* w_ref;
 
@@ -28,6 +29,12 @@ MainWindow::MainWindow(QWidget *parent)
     QObject::connect(ui->connect_btn,&QPushButton::clicked,this,&MainWindow::connect);
 
     current_directory = fs::current_path();
+
+    QFileIconProvider provider;
+    dir_icon = provider.icon(QFileIconProvider::Folder);
+    file_icon = provider.icon(QFileIconProvider::File);
+
+    updateLocalDirectoryListing();
 }
 
 MainWindow::~MainWindow()
@@ -36,15 +43,22 @@ MainWindow::~MainWindow()
 }
 
 void MainWindow::updateLocalDirectoryListing() {
-    cout << "---LOCAL---" << endl;
+    local_files.clear();
     for (const auto & entry : fs::directory_iterator(current_directory)){
-        // iterate each file and insert into the dir listings (f_host, f_server)
-        cout << fs::path(entry).filename().string();
+        // Acquire file name
+        QString f_name = QString::fromStdString(fs::path(entry).filename().string());
+
+        // Construct List Entry
+        unique_ptr<QListWidgetItem> file;
         if (fs::is_directory(entry)) {
-            cout << "(DIR)" << endl;
+            file = make_unique<QListWidgetItem>(dir_icon,f_name);
         } else {
-            cout << "(FILE)" << endl;
+            file = make_unique<QListWidgetItem>(file_icon,f_name);
         }
+
+        // Update listing
+        ui->f_host->addItem(file.get());
+        local_files.push_back(std::move(file));
     }
 }
 
@@ -52,6 +66,10 @@ void MainWindow::updateRemoteDirectoryListing() {
 
     // Retreive directory listing
     string listing = Conn->list();
+
+    if (Conn->getLastResponse().at(0) != D1_COMPLETION){
+        return; // Directory listing was not succesfully transferred.
+    }
 
     // Separate dir listing into lines
     vector<string> lines;
@@ -61,18 +79,24 @@ void MainWindow::updateRemoteDirectoryListing() {
         lines.push_back(temp);
     }
 
-    // run ftpparse on each line to extract file names
     vector<struct ftpparse> directories;
-    cout << "---REMOTE---" << endl;
     for (const string line : lines){
+        // Acquire file name
         struct ftpparse entry;
         ftpparse(&entry,(char*)line.c_str(),line.length());
-        cout << entry.name <<endl;
+        QString f_name = QString(entry.name);
+
+        // Construct List Entry
+        unique_ptr<QListWidgetItem> file;
         if (entry.flagtrycwd == 1) {
-            cout << "(DIR)" << endl;
+            file = make_unique<QListWidgetItem>(dir_icon,f_name);
         } else {
-            cout << "(FILE)" << endl;
+            file = make_unique<QListWidgetItem>(file_icon,f_name);
         }
+
+        // Update listing
+        ui->f_server->addItem(file.get());
+        remote_files.push_back(std::move(file));
     }
 
 }
@@ -107,9 +131,5 @@ void MainWindow::connect()
         return;
     }
 
-    //testcommand
-    // Conn->cwd("ftp");
-
-    updateLocalDirectoryListing();
     updateRemoteDirectoryListing();
 }

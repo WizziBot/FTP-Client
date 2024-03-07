@@ -1,7 +1,10 @@
 
 #pragma once
 
+#include <QListWidgetItem>
 #include <QMainWindow>
+#include <vector>
+#include <memory>
 #include <StatusConstants.h>
 #include <ControlConnection.h>
 
@@ -31,5 +34,7 @@ private:
     Ui::MainWindow *ui;
     FTP::ControlConnection* Conn;
     std::string current_directory;
+    std::vector<std::unique_ptr<QListWidgetItem>> local_files;
+    std::vector<std::unique_ptr<QListWidgetItem>> remote_files;
 };
 
