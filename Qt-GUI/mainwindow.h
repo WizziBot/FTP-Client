@@ -21,11 +21,15 @@ public:
 
     void pushText(std::string output);
 
+    void updateLocalDirectoryListing();
+    void updateRemoteDirectoryListing();
+
 private slots:
     void connect();
 
 private:
     Ui::MainWindow *ui;
     FTP::ControlConnection* Conn;
+    std::string current_directory;
 };
 

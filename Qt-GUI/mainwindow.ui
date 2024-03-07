@@ -191,21 +191,6 @@
     <property name="styleSheet">
      <string notr="true">background-color: rgb(170, 170, 170);</string>
     </property>
-    <item>
-     <property name="text">
-      <string>File1</string>
-     </property>
-    </item>
-    <item>
-     <property name="text">
-      <string>File2</string>
-     </property>
-    </item>
-    <item>
-     <property name="text">
-      <string>Directory1</string>
-     </property>
-    </item>
    </widget>
    <widget class="QListWidget" name="f_server">
     <property name="geometry">
@@ -219,21 +204,6 @@
     <property name="styleSheet">
      <string notr="true">background-color: rgb(170, 170, 170);</string>
     </property>
-    <item>
-     <property name="text">
-      <string>File1</string>
-     </property>
-    </item>
-    <item>
-     <property name="text">
-      <string>File2</string>
-     </property>
-    </item>
-    <item>
-     <property name="text">
-      <string>Directory1</string>
-     </property>
-    </item>
    </widget>
    <widget class="QLabel" name="g_host">
     <property name="geometry">
@@ -375,8 +345,8 @@
      <rect>
       <x>30</x>
       <y>600</y>
-      <width>1051</width>
-      <height>91</height>
+      <width>1041</width>
+      <height>111</height>
      </rect>
     </property>
     <property name="styleSheet">
