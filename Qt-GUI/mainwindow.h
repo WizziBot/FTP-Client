@@ -5,6 +5,7 @@
 #include <QMainWindow>
 #include <vector>
 #include <memory>
+#include <utility>
 #include <StatusConstants.h>
 #include <ControlConnection.h>
 
@@ -29,12 +30,16 @@ public:
 
 private slots:
     void connect();
+    void localDirectoryChange(QListWidgetItem* item);
+    void remoteDirectoryChange(QListWidgetItem* item);
 
 private:
     Ui::MainWindow *ui;
     FTP::ControlConnection* Conn;
     std::string current_directory;
-    std::vector<std::unique_ptr<QListWidgetItem>> local_files;
-    std::vector<std::unique_ptr<QListWidgetItem>> remote_files;
+    std::string current_remote_directory;
+    // Entry: QListWidgetItem, isDirectory flag
+    std::vector<std::pair<std::unique_ptr<QListWidgetItem>,bool>> local_files;
+    std::vector<std::pair<std::unique_ptr<QListWidgetItem>,bool>> remote_files;
 };
 
