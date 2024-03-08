@@ -108,8 +108,9 @@ string retr(const string f_name,const string f_dst);
     Copies local file to server
     @param f_name local file path
     @param f_dst remote file name
+    @returns 0 on success, -1 if failure with no response, -2 if failure with response.
 */
-string stor(const string f_name,const string f_dst);
+int stor(const string f_name,const string f_dst);
 /*
     Requests system information via control connection
 */
@@ -130,6 +131,20 @@ string cwd(const string new_dir);
 
 void setLogger(void(*logger_ptr)(string)){
     log = logger_ptr;
+}
+
+int getTranferProgress(){
+    if (data_connection && data_connection->getStatus() == CONN_SUCCESS){
+        int val = data_connection->transfer_progress;
+        // cout << "VAL " << val << endl;
+        return val;
+    } else {
+        return 100;
+    }
+}
+
+eDataType getTransferType() {
+    return data_type;
 }
 
 private:

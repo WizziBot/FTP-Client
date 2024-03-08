@@ -6,5 +6,5 @@ set(SOURCE_FILES ControlConnection.cpp
                  Commands.cpp)
 add_library(ftpcore ${SOURCE_FILES} )
 add_executable(ftp ftp.cpp)
-target_link_libraries(ftp PRIVATE ftpcore stdc++fs)
+target_link_libraries(ftp PRIVATE ftpcore stdc++fs pthread)
 install(TARGETS ftp DESTINATION ${FTP_INSTALL_BIN_DIR})

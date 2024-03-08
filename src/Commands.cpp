@@ -17,12 +17,9 @@
 #include <ControlConnection.h>
 #include <algorithm>
 #include <cctype>
-#include <fstream>
 #include <sstream>
 #include <iostream>
-#include <experimental/filesystem>
-
-namespace fs = std::experimental::filesystem;
+#include <thread>
 
 namespace FTP {
 
@@ -200,9 +197,9 @@ string ControlConnection::list(){
 
 }
 
-string ControlConnection::stor(const string f_name,const string f_dst){
+int ControlConnection::stor(const string f_name,const string f_dst){
     // Only passive mode 
-    if (data_mode != DATA_PASSIVE) return string("");
+    if (data_mode != DATA_PASSIVE) return -1;
 
     // Activate passive mode on server
     string cmd_string = "PASV\r\n";
@@ -210,13 +207,14 @@ string ControlConnection::stor(const string f_name,const string f_dst){
     send(client_socket,cmd_string.c_str(),cmd_string.length(),0);
     string response = getResponse();
     if (response.size() == 0 || response.at(0) != D1_COMPLETION){
-        return response;
+        return -1;
     }
     log(response);
     // Initiate data connection
     data_connection = new DataConnection(response);
     if (data_connection->getStatus() != CONN_SUCCESS) {
-        return string("Data connection failed");
+        setLastResponse("Data connection failed");
+        return -2;
     }
     // Send store request
     cmd_string = "STOR ";
@@ -228,7 +226,7 @@ string ControlConnection::stor(const string f_name,const string f_dst){
 
     // Receive OK response from server
     if (response.size() == 0 || response.at(0) != D1_PRELIMINARY){
-        return response;
+        return -1;
     }
     log(response);
 
@@ -236,41 +234,27 @@ string ControlConnection::stor(const string f_name,const string f_dst){
 
     fs::path p = f_name;
     string path = fs::absolute(p);
-
     if (data_type == DATA_BINARY){
         
-        // Setup file io stream in binary mode
-        ifstream file(path,std::ios::binary | std::ios::ate);
-        streamsize fsize = file.tellg();
-        file.seekg(0, std::ios::beg);
-
-        // Allocate memory in a vector of 'char' type and then write into it using file.read(destination,size)
-        // Note that char is always 1 byte in size in the C standard.
-        // buffer.data() returns a pointer to the start of the allocated memory for buffer.
-        vector<char> buffer(fsize);
-        if (!file.read(buffer.data(), fsize)) {
+        auto dsend_process = [this](string path){
+            int bytes = data_connection->dsend_binary(path);
             delete data_connection;
-            return string("Error reading file ") + f_name;
-        }
-
-        data_connection->dsend(buffer);
-        delete data_connection;
+            getResponse();
+        };
+        thread dsend_thread(dsend_process,path);
+        dsend_thread.detach();
     } else if (data_type == DATA_ASCII) {
-        // Setup file io stream
-        ifstream file(path);
-        string buffer;
         
-        // Read file line by line and append to the buffer
-        string line;
-        while (getline(file,line)){
-            buffer += line;
-        }
-
-        data_connection->dsend(buffer);
-        delete data_connection;
+        auto dsend_process = [this](string path){
+            int bytes = data_connection->dsend_ascii(path);
+            delete data_connection;
+            getResponse();
+        };
+        thread dsend_thread(dsend_process,path);
+        dsend_thread.detach();
     }
 
-    return getResponse();
+    return 0;
 }
 
 string ControlConnection::retr(string f_name,string f_dst){

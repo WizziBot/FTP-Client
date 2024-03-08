@@ -22,7 +22,10 @@
 #include <unistd.h>
 #include <arpa/inet.h>
 #include <string.h>
+#include <atomic>
 #include <vector>
+#include <fstream>
+#include <experimental/filesystem>
 
 #include <StatusConstants.h>
 
@@ -31,6 +34,7 @@
 namespace FTP {
 
 using namespace std;
+namespace fs = std::experimental::filesystem;
 
 class DataConnection {
 
@@ -46,12 +50,12 @@ DataConnection(string dst_address);
     Read from buffer and write it to data connection socket
     @param buffer char vector with file contents
 */
-int dsend(const vector<char> &buffer);
+int dsend_binary(const string path);
 /*
     Read from buffer and write it to data connection socket
     @param buffer string with text file contents
 */
-int dsend(const string &buffer);
+int dsend_ascii(const string path);
 
 /*
     Reads from the data connection until EOF.
@@ -62,6 +66,8 @@ eConnStatus getStatus(){
     return conn_status;
 }
 
+// Transfer progress is an integer between 0 and 100;
+std::atomic_int transfer_progress = {0};
 private:
 
 eConnStatus conn_status = CONN_NOT_INIT;
