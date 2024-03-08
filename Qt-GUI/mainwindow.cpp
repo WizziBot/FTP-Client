@@ -1,5 +1,4 @@
 #include "mainwindow.h"
-#include "terminaloutput.h"
 #include "ui_mainwindow.h"
 #include "ftpparse.h"
 #include <string>
@@ -11,6 +10,7 @@
 #include <string>
 #include <algorithm>
 #include <time.h>
+#include <StatusConstants.h>
 #include <experimental/filesystem>
 
 namespace fs = std::experimental::filesystem;
@@ -28,10 +28,16 @@ MainWindow::MainWindow(QWidget *parent)
     this->setFixedSize(QSize(1097, 773));
     w_ref = this;
     ui->setupUi(this);
+    ui->p_file_status->setMinimum(0);
+    ui->p_file_status->setMaximum(100);
+    ui->p_file_status->setValue(0);
+
     QObject::connect(ui->connect_btn,&QPushButton::clicked,this,&MainWindow::connect);
 
     QObject::connect(ui->f_host,&QListWidget::itemDoubleClicked,this,&MainWindow::localDirectoryChange);
     QObject::connect(ui->f_server,&QListWidget::itemDoubleClicked,this,&MainWindow::remoteDirectoryChange);
+    QObject::connect(ui->stor_btn,&QPushButton::clicked,this,&MainWindow::storCommand);
+    QObject::connect(ui->recv_btn,&QPushButton::clicked,this,&MainWindow::retrCommand);
 
     current_directory = fs::current_path();
 
@@ -167,23 +173,30 @@ void MainWindow::remoteDirectoryChange(QListWidgetItem* item){
         return;
     };
 
-    if(remote_file->first->text() == ".."){
-        current_remote_directory = fs::path(current_remote_directory).parent_path().string();
-    } else {
-        current_remote_directory = current_remote_directory + "/" + item->text().toStdString();
-    }
-
     updateRemoteDirectoryListing();
+}
+
+bool is_number(const std::string& s)
+{
+    std::string::const_iterator it = s.begin();
+    while (it != s.end() && std::isdigit(*it)) ++it;
+    return !s.empty() && it == s.end();
 }
 
 void MainWindow::connect()
 {
 
     string address = ui->i_address->toPlainText().toStdString();
+    string port_str = ui->i_port->toPlainText().toStdString();
     string username = ui->i_username->toPlainText().toStdString();
     string password = ui->i_password->toPlainText().toStdString();
+
+    if (is_number(port_str)){
+        Conn = new FTP::ControlConnection(address,atoi(port_str.c_str()));
+    } else {
+        Conn = new FTP::ControlConnection(address);
+    }
     
-    Conn = new FTP::ControlConnection(address);
     Conn->setLogger(logger);
     if (Conn->initConnection() == -1){
         pushText(string("Unable to start connection"));
@@ -199,4 +212,53 @@ void MainWindow::connect()
     }
 
     updateRemoteDirectoryListing();
+}
+
+void MainWindow::storCommand(){
+    // Get local file to be sent from QListWidget
+    QListWidgetItem* selected = ui->f_host->currentItem();
+    auto local_file = std::find_if(local_files.begin(),local_files.end(),
+                               [&selected](const std::pair<unique_ptr<QListWidgetItem>,bool>& i_item)
+                               {return (i_item.first->text() == selected->text());});
+    if (local_file->second) return; // Cant send directories.
+    string filename = local_file->first->text().toStdString();
+
+    // Set Progress bar label to file name
+
+    ui->l_file_name->setText(local_file->first->text());
+
+    // Always use binary mode to keep transfers simple.
+
+    if (Conn->getTransferType() != DATA_BINARY){
+        pushText(Conn->type("binary"));
+    }
+
+    int status = Conn->stor(filename,filename);
+    if(status == -1){
+        return;
+    } else if (status == -2) {
+        pushText(Conn->getLastResponse());
+        return;
+    }
+
+    if (Conn->getTranferProgress() == -1) return;
+    int t_progress = Conn->getTranferProgress();
+    while (t_progress < 100) {
+        ui->p_file_status->setValue(t_progress);
+        t_progress = Conn->getTranferProgress();
+    }
+
+    ui->p_file_status->setValue(100);
+
+    pushText(Conn->getLastResponse());
+
+    updateRemoteDirectoryListing();
+}
+
+void MainWindow::retrCommand(){
+    // Get remote file to be sent from QListWidget
+    
+    // Get file name and put in retr() FTP command
+
+    // Update local dir listing
 }

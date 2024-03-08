@@ -16,7 +16,6 @@ set(PROJECT_SOURCES
         main.cpp
         mainwindow.cpp
         mainwindow.ui
-        terminaloutput.h
         ftpparse.cpp
 )
 

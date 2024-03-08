@@ -3,6 +3,8 @@
 
 #include <QListWidgetItem>
 #include <QMainWindow>
+#include <QPlainTextEdit>
+#include <QScrollBar>
 #include <vector>
 #include <memory>
 #include <utility>
@@ -12,6 +14,7 @@
 QT_BEGIN_NAMESPACE
 namespace Ui {
 class MainWindow;
+class TerminalOutput;
 }
 QT_END_NAMESPACE
 
@@ -32,14 +35,32 @@ private slots:
     void connect();
     void localDirectoryChange(QListWidgetItem* item);
     void remoteDirectoryChange(QListWidgetItem* item);
+    void storCommand();
+    void retrCommand();
 
 private:
     Ui::MainWindow *ui;
     FTP::ControlConnection* Conn;
     std::string current_directory;
-    std::string current_remote_directory;
     // Entry: QListWidgetItem, isDirectory flag
     std::vector<std::pair<std::unique_ptr<QListWidgetItem>,bool>> local_files;
     std::vector<std::pair<std::unique_ptr<QListWidgetItem>,bool>> remote_files;
+};
+
+class TerminalOutput : public QPlainTextEdit
+{
+    Q_OBJECT
+
+public:
+    TerminalOutput(QWidget *parent = nullptr) : QPlainTextEdit(parent) {
+        setReadOnly(true);
+    }
+
+    void setTerminalText(const QString& text) {
+        // Scroll to bottom of box and append text.
+        moveCursor(QTextCursor::End);
+        insertPlainText(text);
+        verticalScrollBar()->setValue(verticalScrollBar()->maximum());
+    }
 };
 
