@@ -259,7 +259,8 @@ int ControlConnection::stor(const string f_name,const string f_dst){
         auto dsend_process = [this](string path){
             int bytes = data_connection->dsend_binary(path);
             delete data_connection;
-            getResponse();
+            if (bytes > 0) getResponse();
+            else setLastResponse("Failed to send file");
             transfer_in_progress = false;
         };
         transfer_in_progress = true;
@@ -270,7 +271,8 @@ int ControlConnection::stor(const string f_name,const string f_dst){
         auto dsend_process = [this](string path){
             int bytes = data_connection->dsend_ascii(path);
             delete data_connection;
-            getResponse();
+            if (bytes > 0) getResponse();
+            else setLastResponse("Failed to send file");
             transfer_in_progress = false;
         };
         transfer_in_progress = true;
@@ -281,9 +283,9 @@ int ControlConnection::stor(const string f_name,const string f_dst){
     return 0;
 }
 
-string ControlConnection::retr(string f_name,string f_dst){
+int ControlConnection::retr(string f_name,string f_dst){
     // Only passive mode 
-    if (data_mode != DATA_PASSIVE) return string("");
+    if (data_mode != DATA_PASSIVE) return -1;
 
     // Activate passive mode on server
     string cmd_string = "PASV\r\n";
@@ -291,12 +293,13 @@ string ControlConnection::retr(string f_name,string f_dst){
     send(client_socket,cmd_string.c_str(),cmd_string.length(),0);
     string response = getResponse();
     if (response.size() == 0 || response.at(0) != D1_COMPLETION){
-        return response;
+        return -2;
     }
     // Initiate data connection
     data_connection = new DataConnection(response);
     if (data_connection->getStatus() != CONN_SUCCESS) {
-        return string("Data connection failed");
+        setLastResponse("Data connection failed");
+        return -2;
     }
 
     // Send store request
@@ -310,29 +313,42 @@ string ControlConnection::retr(string f_name,string f_dst){
     // Receive OK response from server
     if (response.size() == 0 || response.at(0) != D1_PRELIMINARY){
         delete data_connection;
-        return response;
+        return -2;
     }
     log(response);
 
-    // Receive payload through data connection
-
-    vector<char> data_to_write = data_connection->drecv_eof();
-    delete data_connection;
-    
-    log("Writing " + to_string(data_to_write.size()) + " bytes to " + f_dst);
-
-    if (data_type == DATA_BINARY){
-        // Setup file io stream in binary mode then write to it and finally close
-        ofstream file(f_dst.c_str(),std::ios::binary);
-        file.write(data_to_write.data(),data_to_write.size());
-        file.close();
-    } else if (data_type == DATA_ASCII) {
-        ofstream file(f_dst.c_str());
-        file.write(data_to_write.data(),data_to_write.size());
-        file.close();
+    // Get size of payload
+    char size_str[32] = {0};
+    int parameter_index = response.find('(') + 1;
+    char c = 0;
+    for (int i=0; i < (int)sizeof(size_str) && parameter_index < (int)response.size(); i++,parameter_index++){
+        c = response.at(parameter_index);
+        if (c == ')') break;
+        size_str[i] = c;
+    }
+    int size_bytes = atoi(size_str);
+    if (size_bytes <= 0){ // Check that a valid size is parsed
+        delete data_connection;
+        return -2;
     }
 
-    return getResponse();
+    auto drecv_process = [this](string f_dst,int fsize,bool binary_mode){
+        int bytes = data_connection->drecv_async(f_dst,fsize,binary_mode);
+        delete data_connection;
+        if (bytes > 0) getResponse();
+        else setLastResponse("Failed to receive file");
+        transfer_in_progress = false;
+    };
+    transfer_in_progress = true;
+    if (data_type == DATA_BINARY){
+        thread dsend_thread(drecv_process,f_dst,size_bytes,true);
+        dsend_thread.detach();
+    } else {thread dsend_thread(drecv_process,f_dst,size_bytes,false);
+        dsend_thread.detach();
+
+    }
+
+    return 0;
 }
 
 }

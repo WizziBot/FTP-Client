@@ -104,7 +104,7 @@ string mode(const string t_mode);
     @param f_name remote file name
     @param f_dst local file name
 */
-string retr(const string f_name,const string f_dst);
+int retr(const string f_name,const string f_dst);
 /*
     Copies local file to server
     @param f_name local file path
@@ -143,13 +143,8 @@ void setLogger(void(*logger_ptr)(string)){
 }
 
 int getTranferProgress(){
-    if (data_connection && data_connection->getStatus() == CONN_SUCCESS){
-        int val = data_connection->transfer_progress;
-        // cout << "VAL " << val << endl;
-        return val;
-    } else {
-        return 100;
-    }
+    if (data_connection && data_connection->getStatus() == CONN_SUCCESS) return data_connection->transfer_progress;
+    else return 0;
 }
 
 eDataType getTransferType() {

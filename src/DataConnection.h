@@ -62,6 +62,14 @@ int dsend_ascii(const string path);
 */
 vector<char> drecv_eof();
 
+/*
+    Reads from the data connection and updates atomic variable transfer_progress.
+    @param f_dst file name on host system
+    @param fsize file size in bytes
+    @param binary_mode is binary connection
+*/
+int drecv_async(string f_dst, int fsize, bool binary_mode);
+
 eConnStatus getStatus(){
     return conn_status;
 }

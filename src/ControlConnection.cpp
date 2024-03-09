@@ -164,9 +164,17 @@ string ControlConnection::processUserCommand(vector<string> command_args){
         return string("Insufficient arguments");
     } else if (command_args.at(0) == "get"){
         if (command_args.size() == 3){
-            return retr(command_args.at(1),command_args.at(2));
+            int status = retr(command_args.at(1),command_args.at(2));
+            if (status == -1) return string ("");
+            else if (status == -2) return getLastResponse();
+            while (transfer_in_progress) {}; // Atomic bool acts as a semaphore
+            return getLastResponse();
         } else if (command_args.size() == 2){
-            return retr(command_args.at(1),command_args.at(1));
+            int status = retr(command_args.at(1),command_args.at(1));
+            if (status == -1) return string ("");
+            else if (status == -2) return getLastResponse();
+            while (transfer_in_progress) {};
+            return getLastResponse();
         }
         return string("Insufficient arguments");
     } else if (command_args.at(0) == "put"){
@@ -174,7 +182,7 @@ string ControlConnection::processUserCommand(vector<string> command_args){
             int status = stor(command_args.at(1),command_args.at(2));
             if (status == -1) return string("");
             else if (status == -2) return getLastResponse();
-            while (transfer_in_progress) {}; // Atomic bool acts as a semaphore
+            while (transfer_in_progress) {};
             return getLastResponse();
         } else if (command_args.size() == 2){
             int status = stor(command_args.at(1),command_args.at(1));

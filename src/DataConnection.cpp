@@ -160,9 +160,9 @@ int DataConnection::dsend_ascii(const string path){
     streampos lastpos = 0;
 
     while (!file.eof() && total_sent < fsize){
-        int chunk_sent = 0;
+        int chunk_sent = 0; // How many bytes sent in current chunk
         memset(buffer,0,FILE_CHUNK_SIZE); // Zero memory buffer used for file contents.
-        streampos read_size = std::min((streampos)FILE_CHUNK_SIZE,(streampos)(fsize-file.tellg()));
+        streampos read_size = min((streampos)FILE_CHUNK_SIZE,(streampos)(fsize-file.tellg()));
         file.read(buffer, read_size); // Read only the necessary amount if its last chunk
         if(file.fail()) {
             cerr << "Filed to read file." << endl;
@@ -225,6 +225,68 @@ vector<char> DataConnection::drecv_eof(){
         }
     }
     return recv_buf;
+}
+
+int DataConnection::drecv_async(string f_dst, int fsize,bool binary_mode){
+
+    ofstream* file;
+
+    if (binary_mode){
+        file = new ofstream(f_dst.c_str(),std::ios::binary);
+    } else {
+        file = new ofstream(f_dst.c_str());
+    }
+
+    // Create buffer for received data
+    char* buffer = (char*)malloc(FILE_CHUNK_SIZE);
+    int total_received = 0;
+    int bytes_received = 0;
+    streampos remaining_bytes = fsize;
+
+    while (total_received < fsize) {
+        int chunk_received = 0; // How many bytes received in current chunk
+        streampos write_size = min((streampos)FILE_CHUNK_SIZE,(streampos)(remaining_bytes-(streampos)total_received)); // Number of bytes in chunk
+        // Iterate over the chunk and send data in further 1024 byte transmision units
+        while (chunk_received < write_size) {
+            int recv_size = min(TRANSMISSION_UNIT,(int)write_size);
+            bytes_received = recv(client_socket, buffer + chunk_received, recv_size, 0);
+            if (bytes_received == -1) {
+                cerr << "Error sending bytes." <<endl;
+                free(buffer);
+                file->close();
+                delete file;
+                return -1;
+            }
+            chunk_received += bytes_received;
+            total_received += bytes_received;
+            transfer_progress = (total_received * 100)/fsize;
+        }
+
+        file->write(buffer,write_size);
+        if(file->fail()) {
+            cerr << "Filed to write to file." << endl;
+            free(buffer);
+            file->close();
+            delete file;
+            return -1;
+        } else if (file->bad()){
+            cerr << "Bad file write." << endl;
+            free(buffer);
+            file->close();
+            delete file;
+            return -1;
+        }
+
+        remaining_bytes = remaining_bytes - write_size;
+
+        memset(buffer,0,FILE_CHUNK_SIZE); // Zero memory buffer after been written to file
+    }
+
+    free(buffer);
+    file->close();
+    delete file;
+
+    return total_received;
 }
 
 }
