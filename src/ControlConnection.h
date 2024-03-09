@@ -25,6 +25,7 @@
 #include <string.h>
 #include <vector>
 #include <sstream>
+#include <atomic>
 
 #include <StatusConstants.h>
 #include <DataConnection.h>
@@ -147,6 +148,10 @@ eDataType getTransferType() {
     return data_type;
 }
 
+bool isTrasferInProgress(){
+    return transfer_in_progress;
+}
+
 private:
 
 /*
@@ -188,6 +193,7 @@ int client_socket;
 struct sockaddr_in server_addr;
 char msg_recv_buffer[1024];
 string lastResponse;
+atomic_bool transfer_in_progress = {false};
 
 DataConnection* data_connection = NULL;
 };

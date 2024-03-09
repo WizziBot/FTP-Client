@@ -247,8 +247,10 @@ void MainWindow::storCommand(){
         ui->p_file_status->setValue(t_progress);
         t_progress = Conn->getTranferProgress();
     }
-
     ui->p_file_status->setValue(100);
+    // Atomic attribute acts as semaphore in ControlConnection
+    // Waits for termination of whole transfer operation including the wrapper lambda.
+    while (Conn->isTrasferInProgress()) {}; 
 
     pushText(Conn->getLastResponse());
 

@@ -207,7 +207,7 @@ int ControlConnection::stor(const string f_name,const string f_dst){
     send(client_socket,cmd_string.c_str(),cmd_string.length(),0);
     string response = getResponse();
     if (response.size() == 0 || response.at(0) != D1_COMPLETION){
-        return -1;
+        return -2;
     }
     log(response);
     // Initiate data connection
@@ -226,7 +226,7 @@ int ControlConnection::stor(const string f_name,const string f_dst){
 
     // Receive OK response from server
     if (response.size() == 0 || response.at(0) != D1_PRELIMINARY){
-        return -1;
+        return -2;
     }
     log(response);
 
@@ -240,7 +240,9 @@ int ControlConnection::stor(const string f_name,const string f_dst){
             int bytes = data_connection->dsend_binary(path);
             delete data_connection;
             getResponse();
+            transfer_in_progress = false;
         };
+        transfer_in_progress = true;
         thread dsend_thread(dsend_process,path);
         dsend_thread.detach();
     } else if (data_type == DATA_ASCII) {
@@ -249,7 +251,9 @@ int ControlConnection::stor(const string f_name,const string f_dst){
             int bytes = data_connection->dsend_ascii(path);
             delete data_connection;
             getResponse();
+            transfer_in_progress = false;
         };
+        transfer_in_progress = true;
         thread dsend_thread(dsend_process,path);
         dsend_thread.detach();
     }
