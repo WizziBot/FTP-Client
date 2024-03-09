@@ -246,7 +246,6 @@ int DataConnection::drecv_async(string f_dst, int fsize,bool binary_mode){
     while (total_received < fsize) {
         int chunk_received = 0; // How many bytes received in current chunk
         streampos write_size = min((streampos)FILE_CHUNK_SIZE,(streampos)(remaining_bytes-(streampos)total_received)); // Number of bytes in chunk
-        // Iterate over the chunk and send data in further 1024 byte transmision units
         while (chunk_received < write_size) {
             int recv_size = min(TRANSMISSION_UNIT,(int)write_size);
             bytes_received = recv(client_socket, buffer + chunk_received, recv_size, 0);
