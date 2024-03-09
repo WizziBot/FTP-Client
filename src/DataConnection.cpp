@@ -101,20 +101,19 @@ int DataConnection::dsend_binary(const string path){
     streampos fsize = file.tellg();
     file.seekg(0, std::ios::beg);
 
-    // Allocate memory in a vector of 'char' type and then write into it using file.read(destination,size)
+    // Allocate memory of FILE_CHUNK_SIZE bytes and then write into it using file.read(destination,size)
     // Note that char is always 1 byte in size in the C standard.
-    // buffer.data() returns a pointer to the start of the allocated memory for buffer.
     char* buffer = (char*)malloc(FILE_CHUNK_SIZE);
     int total_sent = 0;
     int bytes_sent = 0;
     streampos lastpos = 0;
 
-    // Send large files in vector::max_size() chunks
+    // Read large files in FILE_CHUNK_SIZE sized chunks
     while (!file.eof() && total_sent < fsize) {
         int chunk_sent = 0;
-        memset(buffer,0,FILE_CHUNK_SIZE);
+        memset(buffer,0,FILE_CHUNK_SIZE); // Zero memory buffer used for file contents.
         streampos read_size = std::min((streampos)FILE_CHUNK_SIZE,(streampos)(fsize-file.tellg()));
-        file.read(buffer, read_size);
+        file.read(buffer, read_size); // Read only the necessary amount if its last chunk
         if(file.fail()) {
             cerr << "Filed to read file." << endl;
             free(buffer);
@@ -128,7 +127,7 @@ int DataConnection::dsend_binary(const string path){
         int buffer_len = file.tellg() - lastpos;
         lastpos = file.tellg();
 
-        // Iterate over the chunk and send data in further 1024 byte chunks
+        // Iterate over the chunk and send data in further 1024 byte transmision units
         while (chunk_sent < buffer_len) {
             int send_size = min(TRANSMISSION_UNIT,buffer_len);
             bytes_sent = send(client_socket, buffer + chunk_sent, send_size, 0);
@@ -143,6 +142,8 @@ int DataConnection::dsend_binary(const string path){
         }
     }
 
+    free(buffer); // Remember to free buffer
+
     return total_sent;
 }
 
@@ -153,18 +154,44 @@ int DataConnection::dsend_ascii(const string path){
     streampos fsize = file.tellg();
     file.seekg(0, std::ios::beg);
 
+    char* buffer = (char*)malloc(FILE_CHUNK_SIZE);
     int total_sent = 0;
     int bytes_sent = 0;
+    streampos lastpos = 0;
 
-    while (!file.eof()){
-        string line;
-        getline(file,line);
+    while (!file.eof() && total_sent < fsize){
+        int chunk_sent = 0;
+        memset(buffer,0,FILE_CHUNK_SIZE); // Zero memory buffer used for file contents.
+        streampos read_size = std::min((streampos)FILE_CHUNK_SIZE,(streampos)(fsize-file.tellg()));
+        file.read(buffer, read_size); // Read only the necessary amount if its last chunk
+        if(file.fail()) {
+            cerr << "Filed to read file." << endl;
+            free(buffer);
+            return -1;
+        } else if (file.bad()){
+            cerr << "Bad file read." << endl;
+            free(buffer);
+            return -1;
+        }
 
-        bytes_sent = send(client_socket, line.c_str() , line.length(), 0);
-        if (bytes_sent == -1) return -1;
-        total_sent += bytes_sent;
-        transfer_progress = (total_sent * 100)/fsize;
+        int buffer_len = file.tellg() - lastpos;
+        lastpos = file.tellg();
+
+        while (chunk_sent < buffer_len) {
+            int send_size = min(TRANSMISSION_UNIT,buffer_len);
+            bytes_sent = send(client_socket, buffer + chunk_sent, send_size, 0);
+            if (bytes_sent == -1) {
+                cerr << "Error sending bytes." <<endl;
+                free(buffer);
+                return -1;
+            }
+            chunk_sent += bytes_sent;
+            total_sent += bytes_sent;
+            transfer_progress = (total_sent * 100)/fsize;
+        }
     }
+
+    free(buffer);
 
     return total_sent;
 }
