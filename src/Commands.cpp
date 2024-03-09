@@ -93,6 +93,8 @@ string ControlConnection::help(){
     " cd - Change workig directory.\n\n"
     " ls - Print directory contents.\n\n"
     " rm file_name - Delete file on remote server.\n\n"
+    " mkdir dir_name - Create directory on remote server.\n\n"
+    " rmdir dir_name - Remove directory on remote server.\n\n"
     " status - Print connection information.\n\n"
     " system - Prints ftp server system information.\n\n"
     " quit - Terminate connection and exit.\n\n"
@@ -148,6 +150,24 @@ string ControlConnection::stat(){
 string ControlConnection::dele(string f_name){
     string cmd_string = "DELE ";
     cmd_string += f_name;
+    log(cmd_string);
+    cmd_string += "\r\n";
+    send(client_socket,cmd_string.c_str(),cmd_string.length(),0);
+    return getResponse();
+}
+
+string ControlConnection::mkd(const string d_name){
+    string cmd_string = "MKD ";
+    cmd_string += d_name;
+    log(cmd_string);
+    cmd_string += "\r\n";
+    send(client_socket,cmd_string.c_str(),cmd_string.length(),0);
+    return getResponse();
+}
+
+string ControlConnection::rmd(const string d_name){
+    string cmd_string = "RMD ";
+    cmd_string += d_name;
     log(cmd_string);
     cmd_string += "\r\n";
     send(client_socket,cmd_string.c_str(),cmd_string.length(),0);

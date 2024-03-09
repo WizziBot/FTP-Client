@@ -191,6 +191,16 @@ string ControlConnection::processUserCommand(vector<string> command_args){
             return dele(command_args.at(1));
         }
         return string("Insufficient arguments");
+    } else if (command_args.at(0) == "mkdir"){
+        if (command_args.size() == 2){
+            return mkd(command_args.at(1));
+        }
+        return string("Insufficient arguments");
+    } else if (command_args.at(0) == "rmdir"){
+        if (command_args.size() == 2){
+            return rmd(command_args.at(1));
+        }
+        return string("Insufficient arguments");
     } else if (command_args.at(0) == "login") {
         if (command_args.size() == 3) {
             return ftp_login(command_args.at(1),command_args.at(2));

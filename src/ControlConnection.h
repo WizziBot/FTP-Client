@@ -126,6 +126,14 @@ string stat();
 */
 string dele(const string f_name);
 /*
+    Creates new directory on remote server
+*/
+string mkd(const string d_name);
+/*
+    Removes directory on remote server
+*/
+string rmd(const string d_name);
+/*
     Change working directory
 */
 string cwd(const string new_dir);
