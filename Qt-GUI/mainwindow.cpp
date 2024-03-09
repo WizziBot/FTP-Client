@@ -217,6 +217,7 @@ void MainWindow::connect()
 void MainWindow::storCommand(){
     // Get local file to be sent from QListWidget
     QListWidgetItem* selected = ui->f_host->currentItem();
+    if (!selected) return; // Must select file.
     auto local_file = std::find_if(local_files.begin(),local_files.end(),
                                [&selected](const std::pair<unique_ptr<QListWidgetItem>,bool>& i_item)
                                {return (i_item.first->text() == selected->text());});
@@ -241,26 +242,55 @@ void MainWindow::storCommand(){
         return;
     }
 
-    if (Conn->getTranferProgress() == -1) return;
     int t_progress = Conn->getTranferProgress();
-    while (t_progress < 100) {
+    while (t_progress < 100 && Conn->isTrasferInProgress()) {
         ui->p_file_status->setValue(t_progress);
         t_progress = Conn->getTranferProgress();
     }
-    ui->p_file_status->setValue(100);
     // Atomic attribute acts as semaphore in ControlConnection
     // Waits for termination of whole transfer operation including the wrapper lambda.
-    while (Conn->isTrasferInProgress()) {}; 
+    while (Conn->isTrasferInProgress()) {};
 
+    ui->p_file_status->setValue(100);
     pushText(Conn->getLastResponse());
 
     updateRemoteDirectoryListing();
 }
 
 void MainWindow::retrCommand(){
-    // Get remote file to be sent from QListWidget
+    QListWidgetItem* selected = ui->f_server->currentItem();
+    if (!selected) return;
+    auto remote_file = std::find_if(remote_files.begin(),remote_files.end(),
+                               [&selected](const std::pair<unique_ptr<QListWidgetItem>,bool>& i_item)
+                               {return (i_item.first->text() == selected->text());});
+    if (remote_file->second) return;
+    string filename = remote_file->first->text().toStdString();
     
-    // Get file name and put in retr() FTP command
+    ui->l_file_name->setText(remote_file->first->text());
 
-    // Update local dir listing
+    if (Conn->getTransferType() != DATA_BINARY){
+        pushText(Conn->type("binary"));
+    }
+
+    int status = Conn->retr(filename,filename);
+    if(status == -1){
+        return;
+    } else if (status == -2) {
+        pushText(Conn->getLastResponse());
+        return;
+    }
+
+    int t_progress = Conn->getTranferProgress();
+    while (t_progress < 100 && Conn->isTrasferInProgress()) {
+        ui->p_file_status->setValue(t_progress);
+        t_progress = Conn->getTranferProgress();
+    }
+
+    while (Conn->isTrasferInProgress()) {}; 
+
+    ui->p_file_status->setValue(100);
+    pushText(Conn->getLastResponse());
+
+
+    updateLocalDirectoryListing();
 }
