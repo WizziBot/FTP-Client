@@ -57,6 +57,11 @@ MainWindow::~MainWindow()
     delete ui;
 }
 
+string trimTrailingWhitespace(const std::string& str) {
+    size_t endpos = str.find_last_not_of("'\t\r\n");
+    return (endpos != string::npos) ? str.substr(0, endpos + 1) : "NameResolutionError";
+}
+
 void MainWindow::updateLocalDirectoryListing() {
     local_files.clear();
     // Add listing for parent directory (..)
@@ -111,7 +116,7 @@ void MainWindow::updateRemoteDirectoryListing() {
         // Acquire file name
         struct ftpparse entry;
         ftpparse(&entry,(char*)line.c_str(),line.length());
-        QString f_name = QString(entry.name);
+        QString f_name = QString::fromStdString(trimTrailingWhitespace(string(entry.name,entry.namelen)));
 
         // Construct List Entry
         unique_ptr<QListWidgetItem> file;

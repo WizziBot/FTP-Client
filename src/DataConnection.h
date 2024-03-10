@@ -68,7 +68,7 @@ vector<char> drecv_eof();
     @param fsize file size in bytes
     @param binary_mode is binary connection
 */
-int drecv_async(string f_dst, int fsize, bool binary_mode);
+int drecv_async(string f_dst, uint64_t fsize, bool binary_mode);
 
 eConnStatus getStatus(){
     return conn_status;

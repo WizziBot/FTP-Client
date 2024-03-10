@@ -283,7 +283,7 @@ int ControlConnection::stor(const string f_name,const string f_dst){
     return 0;
 }
 
-int ControlConnection::retr(string f_name,string f_dst,int size_bytes){
+int ControlConnection::retr(string f_name,string f_dst,uint64_t size_bytes){
     // Only passive mode 
     if (data_mode != DATA_PASSIVE) return -1;
 
@@ -317,7 +317,7 @@ int ControlConnection::retr(string f_name,string f_dst,int size_bytes){
     }
     log(response);
 
-    auto drecv_process = [this](string f_dst,int fsize,bool binary_mode){
+    auto drecv_process = [this](string f_dst,uint64_t fsize,bool binary_mode){
         int bytes = data_connection->drecv_async(f_dst,fsize,binary_mode);
         delete data_connection;
         if (bytes > 0) getResponse();

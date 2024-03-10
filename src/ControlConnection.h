@@ -104,7 +104,7 @@ string mode(const string t_mode);
     @param f_name remote file name
     @param f_dst local file name
 */
-int retr(const string f_name,const string f_dst,int size_bytes);
+int retr(const string f_name,const string f_dst,uint64_t size_bytes);
 /*
     Copies local file to server
     @param f_name local file path
