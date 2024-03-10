@@ -39,6 +39,8 @@ MainWindow::MainWindow(QWidget *parent)
     QObject::connect(ui->f_server,&QListWidget::itemClicked,this,&MainWindow::updateFileInfo);
     QObject::connect(ui->stor_btn,&QPushButton::clicked,this,&MainWindow::storCommand);
     QObject::connect(ui->recv_btn,&QPushButton::clicked,this,&MainWindow::retrCommand);
+    QObject::connect(ui->dele_btn,&QPushButton::clicked,this,&MainWindow::deleCommand);
+    QObject::connect(ui->rmd_btn,&QPushButton::clicked,this,&MainWindow::rmdCommand);
 
     current_directory = fs::current_path();
 
@@ -313,10 +315,10 @@ void MainWindow::updateFileInfo(QListWidgetItem* item) {
     string file_size = "File Size: ";
     if (remote_file->second.is_dir){
         is_directory += "Yes";
-        file_size += to_string(remote_file->second.size);
+        file_size += to_string(0);
     } else {
         is_directory += "No";
-        file_size += to_string(0);
+        file_size += to_string(remote_file->second.size);
     }
 
     // Edit file information widget
@@ -328,11 +330,35 @@ void MainWindow::updateFileInfo(QListWidgetItem* item) {
 }
 
 void MainWindow::deleCommand(){
+    // Get file info
+
+    QListWidgetItem* selected = ui->f_server->currentItem();
+    if (!selected) return;
+    auto remote_file = std::find_if(remote_files.begin(),remote_files.end(),
+                               [&selected](const std::pair<unique_ptr<QListWidgetItem>,struct fileinfo>& i_item)
+                               {return (i_item.first->text() == selected->text());});
+    if (remote_file->second.is_dir) return;
     
+    // Send delete request
+    string response = Conn->dele(remote_file->first->text().toStdString());
+    pushText(response);
+
+    updateRemoteDirectoryListing();
 }
 
 void MainWindow::rmdCommand(){
+    QListWidgetItem* selected = ui->f_server->currentItem();
+    if (!selected) return;
+    auto remote_file = std::find_if(remote_files.begin(),remote_files.end(),
+                               [&selected](const std::pair<unique_ptr<QListWidgetItem>,struct fileinfo>& i_item)
+                               {return (i_item.first->text() == selected->text());});
+    if (!remote_file->second.is_dir) return;
     
+    // Send rmdir request
+    string response = Conn->rmd(remote_file->first->text().toStdString());
+    pushText(response);
+
+    updateRemoteDirectoryListing();
 }
 
 void MainWindow::typeCommand(){
