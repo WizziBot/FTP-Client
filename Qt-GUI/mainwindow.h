@@ -18,6 +18,11 @@ class TerminalOutput;
 }
 QT_END_NAMESPACE
 
+struct fileinfo {
+  int is_dir;
+  long size;
+};
+
 class MainWindow : public QMainWindow
 {
     Q_OBJECT
@@ -37,6 +42,10 @@ private slots:
     void remoteDirectoryChange(QListWidgetItem* item);
     void storCommand();
     void retrCommand();
+    void updateFileInfo(QListWidgetItem* item);
+    void deleCommand();
+    void rmdCommand();
+    void typeCommand();
 
 private:
     Ui::MainWindow *ui;
@@ -44,7 +53,7 @@ private:
     std::string current_directory;
     // Entry: QListWidgetItem, isDirectory flag
     std::vector<std::pair<std::unique_ptr<QListWidgetItem>,bool>> local_files;
-    std::vector<std::pair<std::unique_ptr<QListWidgetItem>,bool>> remote_files;
+    std::vector<std::pair<std::unique_ptr<QListWidgetItem>,struct fileinfo>> remote_files;
 };
 
 class TerminalOutput : public QPlainTextEdit

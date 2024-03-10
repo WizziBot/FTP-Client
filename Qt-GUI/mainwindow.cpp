@@ -36,6 +36,7 @@ MainWindow::MainWindow(QWidget *parent)
 
     QObject::connect(ui->f_host,&QListWidget::itemDoubleClicked,this,&MainWindow::localDirectoryChange);
     QObject::connect(ui->f_server,&QListWidget::itemDoubleClicked,this,&MainWindow::remoteDirectoryChange);
+    QObject::connect(ui->f_server,&QListWidget::itemClicked,this,&MainWindow::updateFileInfo);
     QObject::connect(ui->stor_btn,&QPushButton::clicked,this,&MainWindow::storCommand);
     QObject::connect(ui->recv_btn,&QPushButton::clicked,this,&MainWindow::retrCommand);
 
@@ -89,7 +90,10 @@ void MainWindow::updateRemoteDirectoryListing() {
     // Add listing for parent directory (..)
     unique_ptr<QListWidgetItem> file = make_unique<QListWidgetItem>(dir_icon,"..");
     ui->f_server->addItem(file.get());
-    remote_files.push_back(make_pair<unique_ptr<QListWidgetItem>,bool>(std::move(file),true));
+    struct fileinfo back_file;
+    back_file.is_dir = 1;
+    back_file.size = 0;
+    remote_files.push_back(make_pair<unique_ptr<QListWidgetItem>,struct fileinfo>(std::move(file),(struct fileinfo)back_file));
 
     // Separate dir listing into lines
     vector<string> lines;
@@ -114,9 +118,12 @@ void MainWindow::updateRemoteDirectoryListing() {
             file = make_unique<QListWidgetItem>(file_icon,f_name);
         }
 
+        struct fileinfo finfo;
+        finfo.is_dir = entry.flagtrycwd;
+        finfo.size = entry.size;
         // Update listing
         ui->f_server->addItem(file.get());
-        remote_files.push_back(make_pair<unique_ptr<QListWidgetItem>,bool>(std::move(file),entry.flagtrycwd == 1));
+        remote_files.push_back(make_pair<unique_ptr<QListWidgetItem>,struct fileinfo > (std::move(file),(struct fileinfo)finfo));
     }
 
 }
@@ -160,11 +167,11 @@ void MainWindow::localDirectoryChange(QListWidgetItem* item){
 
 void MainWindow::remoteDirectoryChange(QListWidgetItem* item){
     auto remote_file = std::find_if(remote_files.begin(),remote_files.end(),
-                               [&item](const std::pair<unique_ptr<QListWidgetItem>,bool>& i_item)
+                               [&item](const std::pair<unique_ptr<QListWidgetItem>,struct fileinfo>& i_item)
                                {return (i_item.first->text() == item->text());});
 
     if (remote_file == remote_files.end()) return;
-    if (!remote_file->second) return; // If file is not a directory, ignore.
+    if (!remote_file->second.is_dir) return; // If file is not a directory, ignore.
 
     string response = Conn->cwd(remote_file->first->text().toStdString());
     if (response.at(0) != D1_COMPLETION) { // If directory change failed, do not proceed.
@@ -261,9 +268,9 @@ void MainWindow::retrCommand(){
     QListWidgetItem* selected = ui->f_server->currentItem();
     if (!selected) return;
     auto remote_file = std::find_if(remote_files.begin(),remote_files.end(),
-                               [&selected](const std::pair<unique_ptr<QListWidgetItem>,bool>& i_item)
+                               [&selected](const std::pair<unique_ptr<QListWidgetItem>,struct fileinfo>& i_item)
                                {return (i_item.first->text() == selected->text());});
-    if (remote_file->second) return;
+    if (remote_file->second.is_dir) return;
     string filename = remote_file->first->text().toStdString();
     
     ui->l_file_name->setText(remote_file->first->text());
@@ -293,4 +300,41 @@ void MainWindow::retrCommand(){
 
 
     updateLocalDirectoryListing();
+}
+
+void MainWindow::updateFileInfo(QListWidgetItem* item) {
+    QListWidgetItem* selected = ui->f_server->currentItem();
+    if (!selected) return;
+    auto remote_file = std::find_if(remote_files.begin(),remote_files.end(),
+                               [&selected](const std::pair<unique_ptr<QListWidgetItem>,struct fileinfo>& i_item)
+                               {return (i_item.first->text() == selected->text());});
+    string filename =  "File Name: "+remote_file->first->text().toStdString();
+    string is_directory = "Is Directory: ";
+    string file_size = "File Size: ";
+    if (remote_file->second.is_dir){
+        is_directory += "Yes";
+        file_size += to_string(remote_file->second.size);
+    } else {
+        is_directory += "No";
+        file_size += to_string(0);
+    }
+
+    // Edit file information widget
+
+    ui->f_remote_info->clear();
+    ui->f_remote_info->addItem(QString::fromStdString(filename));
+    ui->f_remote_info->addItem(QString::fromStdString(is_directory));
+    ui->f_remote_info->addItem(QString::fromStdString(file_size));
+}
+
+void MainWindow::deleCommand(){
+    
+}
+
+void MainWindow::rmdCommand(){
+    
+}
+
+void MainWindow::typeCommand(){
+    
 }
