@@ -272,7 +272,7 @@ void MainWindow::retrCommand(){
     
     ui->l_file_name->setText(remote_file->first->text());
 
-    int status = Conn->retr(filename,filename);
+    int status = Conn->retr(filename,filename,remote_file->second.size);
     if(status == -1){
         return;
     } else if (status == -2) {

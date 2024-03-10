@@ -237,6 +237,14 @@ int DataConnection::drecv_async(string f_dst, int fsize,bool binary_mode){
         file = new ofstream(f_dst.c_str());
     }
 
+    if (fsize == -1) {
+        vector<char> buff = drecv_eof();
+        file->write(buff.data(),buff.size());
+        file->close();
+        delete file;
+        return 0;
+    }
+
     // Create buffer for received data
     char* buffer = (char*)malloc(FILE_CHUNK_SIZE);
     int total_received = 0;
@@ -248,7 +256,7 @@ int DataConnection::drecv_async(string f_dst, int fsize,bool binary_mode){
         streampos write_size = min((streampos)FILE_CHUNK_SIZE,(streampos)(remaining_bytes-(streampos)total_received)); // Number of bytes in chunk
         while (chunk_received < write_size) {
             int recv_size = min(TRANSMISSION_UNIT,(int)write_size);
-            bytes_received = recv(client_socket, buffer + chunk_received, recv_size, 0);
+            bytes_received = recv(client_socket, buffer + chunk_received, recv_size, MSG_WAITALL);
             if (bytes_received == -1) {
                 cerr << "Error sending bytes." <<endl;
                 free(buffer);
@@ -275,8 +283,6 @@ int DataConnection::drecv_async(string f_dst, int fsize,bool binary_mode){
             delete file;
             return -1;
         }
-
-        remaining_bytes = remaining_bytes - write_size;
 
         memset(buffer,0,FILE_CHUNK_SIZE); // Zero memory buffer after been written to file
     }
