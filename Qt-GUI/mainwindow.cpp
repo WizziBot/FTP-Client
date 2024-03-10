@@ -238,12 +238,6 @@ void MainWindow::storCommand(){
 
     ui->l_file_name->setText(local_file->first->text());
 
-    // Always use binary mode to keep transfers simple.
-
-    if (Conn->getTransferType() != DATA_BINARY){
-        pushText(Conn->type("binary"));
-    }
-
     int status = Conn->stor(filename,filename);
     if(status == -1){
         return;
@@ -277,10 +271,6 @@ void MainWindow::retrCommand(){
     string filename = remote_file->first->text().toStdString();
     
     ui->l_file_name->setText(remote_file->first->text());
-
-    if (Conn->getTransferType() != DATA_BINARY){
-        pushText(Conn->type("binary"));
-    }
 
     int status = Conn->retr(filename,filename);
     if(status == -1){
