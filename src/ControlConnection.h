@@ -155,6 +155,10 @@ bool isTrasferInProgress(){
     return transfer_in_progress;
 }
 
+eDataType getDataType() {
+    return data_type;
+}
+
 private:
 
 /*

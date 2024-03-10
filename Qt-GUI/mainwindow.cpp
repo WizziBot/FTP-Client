@@ -41,6 +41,7 @@ MainWindow::MainWindow(QWidget *parent)
     QObject::connect(ui->recv_btn,&QPushButton::clicked,this,&MainWindow::retrCommand);
     QObject::connect(ui->dele_btn,&QPushButton::clicked,this,&MainWindow::deleCommand);
     QObject::connect(ui->rmd_btn,&QPushButton::clicked,this,&MainWindow::rmdCommand);
+    QObject::connect(ui->switch_type_btn,&QPushButton::clicked,this,&MainWindow::typeCommand);
 
     current_directory = fs::current_path();
 
@@ -362,5 +363,19 @@ void MainWindow::rmdCommand(){
 }
 
 void MainWindow::typeCommand(){
-    
+    string label_text = "Current: ";
+    string response;
+    if (Conn->getDataType() == DATA_ASCII) {
+        response = Conn->type("binary");
+        if (response.at(0) == D1_COMPLETION){
+            label_text += "BINARY";
+        }
+    } else {
+        response = Conn->type("ascii");
+        if (response.at(0) == D1_COMPLETION){
+            label_text += "ASCII";
+        }
+    }
+    pushText(response);
+    ui->l_current_type->setText(QString::fromStdString(label_text));
 }
