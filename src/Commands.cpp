@@ -259,7 +259,7 @@ int ControlConnection::stor(const string f_name,const string f_dst){
         auto dsend_process = [this](string path){
             int bytes = data_connection->dsend_binary(path);
             delete data_connection;
-            if (bytes > 0) getResponse();
+            if (bytes >= 0) getResponse();
             else setLastResponse("Failed to send file");
             transfer_in_progress = false;
         };
@@ -271,7 +271,7 @@ int ControlConnection::stor(const string f_name,const string f_dst){
         auto dsend_process = [this](string path){
             int bytes = data_connection->dsend_ascii(path);
             delete data_connection;
-            if (bytes > 0) getResponse();
+            if (bytes >= 0) getResponse();
             else setLastResponse("Failed to send file");
             transfer_in_progress = false;
         };
@@ -320,7 +320,7 @@ int ControlConnection::retr(string f_name,string f_dst,uint64_t size_bytes){
     auto drecv_process = [this](string f_dst,uint64_t fsize,bool binary_mode){
         int bytes = data_connection->drecv_async(f_dst,fsize,binary_mode);
         delete data_connection;
-        if (bytes > 0) getResponse();
+        if (bytes >= 0) getResponse();
         else setLastResponse("Failed to receive file");
         transfer_in_progress = false;
     };
