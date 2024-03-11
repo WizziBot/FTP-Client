@@ -49,7 +49,7 @@ private slots:
 
 private:
     Ui::MainWindow *ui;
-    FTP::ControlConnection* Conn;
+    FTP::ControlConnection* Conn = nullptr;
     std::string current_directory;
     // Entry: QListWidgetItem, isDirectory flag
     std::vector<std::pair<std::unique_ptr<QListWidgetItem>,bool>> local_files;

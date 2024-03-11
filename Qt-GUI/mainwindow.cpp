@@ -230,6 +230,8 @@ void MainWindow::connect()
 }
 
 void MainWindow::storCommand(){
+    if (!Conn || Conn->getConStatus() != CONN_SUCCESS) return;
+
     // Get local file to be sent from QListWidget
     QListWidgetItem* selected = ui->f_host->currentItem();
     if (!selected) return; // Must select file.
@@ -267,6 +269,8 @@ void MainWindow::storCommand(){
 }
 
 void MainWindow::retrCommand(){
+    if (!Conn || Conn->getConStatus() != CONN_SUCCESS) return;
+
     QListWidgetItem* selected = ui->f_server->currentItem();
     if (!selected) return;
     auto remote_file = std::find_if(remote_files.begin(),remote_files.end(),
@@ -301,6 +305,8 @@ void MainWindow::retrCommand(){
 }
 
 void MainWindow::updateFileInfo(QListWidgetItem* item) {
+    if (!Conn || Conn->getConStatus() != CONN_SUCCESS) return;
+
     QListWidgetItem* selected = ui->f_server->currentItem();
     if (!selected) return;
     auto remote_file = std::find_if(remote_files.begin(),remote_files.end(),
@@ -326,7 +332,7 @@ void MainWindow::updateFileInfo(QListWidgetItem* item) {
 }
 
 void MainWindow::deleCommand(){
-    // Get file info
+    if (!Conn || Conn->getConStatus() != CONN_SUCCESS) return;
 
     QListWidgetItem* selected = ui->f_server->currentItem();
     if (!selected) return;
@@ -343,6 +349,8 @@ void MainWindow::deleCommand(){
 }
 
 void MainWindow::rmdCommand(){
+    if (!Conn || Conn->getConStatus() != CONN_SUCCESS) return;
+    
     QListWidgetItem* selected = ui->f_server->currentItem();
     if (!selected) return;
     auto remote_file = std::find_if(remote_files.begin(),remote_files.end(),
@@ -358,6 +366,7 @@ void MainWindow::rmdCommand(){
 }
 
 void MainWindow::typeCommand(){
+    if (!Conn || Conn->getConStatus() != CONN_SUCCESS) return;
     string label_text = "Current: ";
     string response;
     if (Conn->getDataType() == DATA_ASCII) {
