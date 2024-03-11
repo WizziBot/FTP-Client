@@ -126,10 +126,9 @@ int DataConnection::dsend_binary(const string path){
 
         int buffer_len = file.tellg() - lastpos;
         lastpos = file.tellg();
-
         // Iterate over the chunk and send data in further 1024 byte transmision units
         while (chunk_sent < buffer_len) {
-            int send_size = min(TRANSMISSION_UNIT,buffer_len);
+            int send_size = min(TRANSMISSION_UNIT,buffer_len-chunk_sent);
             bytes_sent = send(client_socket, buffer + chunk_sent, send_size, 0);
             if (bytes_sent == -1) {
                 cerr << "Error sending bytes." <<endl;
@@ -178,7 +177,7 @@ int DataConnection::dsend_ascii(const string path){
         lastpos = file.tellg();
 
         while (chunk_sent < buffer_len) {
-            int send_size = min(TRANSMISSION_UNIT,buffer_len);
+            int send_size = min(TRANSMISSION_UNIT,buffer_len-chunk_sent);
             bytes_sent = send(client_socket, buffer + chunk_sent, send_size, 0);
             if (bytes_sent == -1) {
                 cerr << "Error sending bytes." <<endl;
