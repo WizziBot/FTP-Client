@@ -1,5 +1,7 @@
 #pragma once
 
+#include <inttypes.h>
+
 #define S_READY 220
 #define S_STATUS_INDICATOR 211
 #define S_GOODBYE 221

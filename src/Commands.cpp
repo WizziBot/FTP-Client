@@ -283,7 +283,7 @@ int ControlConnection::stor(const string f_name,const string f_dst){
     return 0;
 }
 
-int ControlConnection::retr(string f_name,string f_dst){
+int ControlConnection::retr(string f_name,string f_dst,uint64_t size_bytes){
     // Only passive mode 
     if (data_mode != DATA_PASSIVE) return -1;
 
@@ -317,22 +317,7 @@ int ControlConnection::retr(string f_name,string f_dst){
     }
     log(response);
 
-    // Get size of payload
-    char size_str[32] = {0};
-    int parameter_index = response.find('(') + 1;
-    char c = 0;
-    for (int i=0; i < (int)sizeof(size_str) && parameter_index < (int)response.size(); i++,parameter_index++){
-        c = response.at(parameter_index);
-        if (c == ')') break;
-        size_str[i] = c;
-    }
-    int size_bytes = atoi(size_str);
-    if (size_bytes <= 0){ // Check that a valid size is parsed
-        delete data_connection;
-        return -2;
-    }
-
-    auto drecv_process = [this](string f_dst,int fsize,bool binary_mode){
+    auto drecv_process = [this](string f_dst,uint64_t fsize,bool binary_mode){
         int bytes = data_connection->drecv_async(f_dst,fsize,binary_mode);
         delete data_connection;
         if (bytes > 0) getResponse();

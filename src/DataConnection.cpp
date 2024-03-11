@@ -104,7 +104,7 @@ int DataConnection::dsend_binary(const string path){
     // Allocate memory of FILE_CHUNK_SIZE bytes and then write into it using file.read(destination,size)
     // Note that char is always 1 byte in size in the C standard.
     char* buffer = (char*)malloc(FILE_CHUNK_SIZE);
-    int total_sent = 0;
+    uint64_t total_sent = 0;
     int bytes_sent = 0;
     streampos lastpos = 0;
 
@@ -155,7 +155,7 @@ int DataConnection::dsend_ascii(const string path){
     file.seekg(0, std::ios::beg);
 
     char* buffer = (char*)malloc(FILE_CHUNK_SIZE);
-    int total_sent = 0;
+    uint64_t total_sent = 0;
     int bytes_sent = 0;
     streampos lastpos = 0;
 
@@ -227,19 +227,26 @@ vector<char> DataConnection::drecv_eof(){
     return recv_buf;
 }
 
-int DataConnection::drecv_async(string f_dst, int fsize,bool binary_mode){
+int DataConnection::drecv_async(string f_dst, uint64_t fsize,bool binary_mode){
 
     ofstream* file;
-
     if (binary_mode){
-        file = new ofstream(f_dst.c_str(),std::ios::binary);
+        file = new ofstream(f_dst,std::ios::binary);
     } else {
-        file = new ofstream(f_dst.c_str());
+        file = new ofstream(f_dst);
+    }
+
+    if (fsize == -1) {
+        vector<char> buff = drecv_eof();
+        file->write(buff.data(),buff.size());
+        file->close();
+        delete file;
+        return 0;
     }
 
     // Create buffer for received data
     char* buffer = (char*)malloc(FILE_CHUNK_SIZE);
-    int total_received = 0;
+    uint64_t total_received = 0;
     int bytes_received = 0;
     streampos remaining_bytes = fsize;
 
@@ -248,9 +255,9 @@ int DataConnection::drecv_async(string f_dst, int fsize,bool binary_mode){
         streampos write_size = min((streampos)FILE_CHUNK_SIZE,(streampos)(remaining_bytes-(streampos)total_received)); // Number of bytes in chunk
         while (chunk_received < write_size) {
             int recv_size = min(TRANSMISSION_UNIT,(int)write_size);
-            bytes_received = recv(client_socket, buffer + chunk_received, recv_size, 0);
+            bytes_received = recv(client_socket, buffer + chunk_received, recv_size, MSG_WAITALL);
             if (bytes_received == -1) {
-                cerr << "Error sending bytes." <<endl;
+                cerr << "Error receiving bytes." <<endl;
                 free(buffer);
                 file->close();
                 delete file;
@@ -275,8 +282,6 @@ int DataConnection::drecv_async(string f_dst, int fsize,bool binary_mode){
             delete file;
             return -1;
         }
-
-        remaining_bytes = remaining_bytes - write_size;
 
         memset(buffer,0,FILE_CHUNK_SIZE); // Zero memory buffer after been written to file
     }
