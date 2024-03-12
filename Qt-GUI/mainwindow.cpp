@@ -40,6 +40,7 @@ MainWindow::MainWindow(QWidget *parent)
     QObject::connect(ui->stor_btn,&QPushButton::clicked,this,&MainWindow::storCommand);
     QObject::connect(ui->recv_btn,&QPushButton::clicked,this,&MainWindow::retrCommand);
     QObject::connect(ui->dele_btn,&QPushButton::clicked,this,&MainWindow::deleCommand);
+    QObject::connect(ui->mkdir_btn,&QPushButton::clicked,this,&MainWindow::mkdCommand);
     QObject::connect(ui->rmd_btn,&QPushButton::clicked,this,&MainWindow::rmdCommand);
     QObject::connect(ui->switch_type_btn,&QPushButton::clicked,this,&MainWindow::typeCommand);
 
@@ -343,6 +344,20 @@ void MainWindow::deleCommand(){
     
     // Send delete request
     string response = Conn->dele(remote_file->first->text().toStdString());
+    pushText(response);
+
+    updateRemoteDirectoryListing();
+}
+
+void MainWindow::mkdCommand(){
+    if (!Conn || Conn->getConStatus() != CONN_SUCCESS) return;
+
+    string dir_name = ui->i_newdir->toPlainText().toStdString();
+    ui->i_newdir->setText("");
+    if (dir_name == "") return; // Cannot be empty
+    
+    // Send rmdir request
+    string response = Conn->mkd(dir_name);
     pushText(response);
 
     updateRemoteDirectoryListing();

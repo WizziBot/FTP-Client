@@ -44,6 +44,7 @@ private slots:
     void retrCommand();
     void updateFileInfo(QListWidgetItem* item);
     void deleCommand();
+    void mkdCommand();
     void rmdCommand();
     void typeCommand();
 

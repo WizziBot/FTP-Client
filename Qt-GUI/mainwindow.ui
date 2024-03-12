@@ -77,7 +77,7 @@
     <property name="geometry">
      <rect>
       <x>740</x>
-      <y>390</y>
+      <y>400</y>
       <width>301</width>
       <height>27</height>
      </rect>
@@ -270,7 +270,7 @@
      <string>Server</string>
     </property>
    </widget>
-   <widget class="TerminalOutput" name="o_control_text">
+   <widget class="TerminalOutput" name="o_control_text" native="true">
     <property name="geometry">
      <rect>
       <x>30</x>
@@ -307,10 +307,10 @@
    <widget class="QListWidget" name="f_remote_info">
     <property name="geometry">
      <rect>
-      <x>740</x>
+      <x>730</x>
       <y>130</y>
-      <width>301</width>
-      <height>101</height>
+      <width>311</width>
+      <height>91</height>
      </rect>
     </property>
     <property name="styleSheet">
@@ -336,9 +336,9 @@ background-color: rgb(85, 85, 85);</string>
    <widget class="QPushButton" name="dele_btn">
     <property name="geometry">
      <rect>
-      <x>740</x>
-      <y>250</y>
-      <width>112</width>
+      <x>730</x>
+      <y>240</y>
+      <width>111</width>
       <height>35</height>
      </rect>
     </property>
@@ -358,7 +358,7 @@ background-color: rgb(85, 85, 85);</string>
     <property name="geometry">
      <rect>
       <x>930</x>
-      <y>250</y>
+      <y>240</y>
       <width>112</width>
       <height>35</height>
      </rect>
@@ -378,8 +378,8 @@ background-color: rgb(85, 85, 85);</string>
    <widget class="QPushButton" name="switch_type_btn">
     <property name="geometry">
      <rect>
-      <x>740</x>
-      <y>300</y>
+      <x>730</x>
+      <y>290</y>
       <width>121</width>
       <height>35</height>
      </rect>
@@ -400,7 +400,7 @@ background-color: rgb(85, 85, 85);</string>
     <property name="geometry">
      <rect>
       <x>880</x>
-      <y>300</y>
+      <y>290</y>
       <width>161</width>
       <height>31</height>
      </rect>
@@ -421,7 +421,7 @@ background-color: rgb(85, 85, 85);</string>
    <widget class="QLabel" name="l_remote_file_info">
     <property name="geometry">
      <rect>
-      <x>740</x>
+      <x>730</x>
       <y>90</y>
       <width>161</width>
       <height>27</height>
@@ -438,6 +438,48 @@ background-color: rgb(85, 85, 85);</string>
     </property>
     <property name="text">
      <string>Remote File Info</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="mkdir_btn">
+    <property name="geometry">
+     <rect>
+      <x>730</x>
+      <y>340</y>
+      <width>111</width>
+      <height>35</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <bold>false</bold>
+     </font>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">color: rgb(255, 255, 255);</string>
+    </property>
+    <property name="text">
+     <string>MKDIR</string>
+    </property>
+   </widget>
+   <widget class="QTextEdit" name="i_newdir">
+    <property name="geometry">
+     <rect>
+      <x>860</x>
+      <y>340</y>
+      <width>191</width>
+      <height>41</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <bold>false</bold>
+     </font>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">color: rgb(243, 243, 243);</string>
+    </property>
+    <property name="placeholderText">
+     <string>Directory Name</string>
     </property>
    </widget>
   </widget>
